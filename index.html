@@ -1206,6 +1206,7 @@
     remaining: DEFAULT_SEQUENCE[0] * 60,
     running: false,
     stageStarted: false,
+    sessionCompleted: false,
     endAt: 0,
     overtime: false,
     overtimeStartAt: 0,
@@ -2825,7 +2826,23 @@
     const ratio = Math.max(0, Math.min(1, progressPct / 100));
     const step = Math.round(ratio * 120);
     const dark = isDarkTheme();
-    const key = `${step}-${AppState.running ? 1 : 0}-${dark ? 1 : 0}`;
+    if (AppState.sessionCompleted && !AppState.running) {
+        const doneKey = "session-completed";
+        if (lastFaviconKey === doneKey) return;
+        lastFaviconKey = doneKey;
+        const size = faviconCanvas.width || 64;
+        const cx = size / 2;
+        const r = cx - 2;
+        faviconCtx.clearRect(0, 0, size, size);
+        faviconCtx.beginPath();
+        faviconCtx.arc(cx, cx, r, 0, Math.PI * 2);
+        faviconCtx.fillStyle = "#ffd60a";
+        faviconCtx.fill();
+        faviconLink.href = faviconCanvas.toDataURL("image/png");
+        return;
+      }
+
+      const key = `${step}-${AppState.running ? 1 : 0}-${dark ? 1 : 0}`;
     if (key === lastFaviconKey) return;
     lastFaviconKey = key;
 
@@ -3020,6 +3037,7 @@
     }
 
     function finishOvertimeToBreak() {
+      AppState.sessionCompleted = false;
       if (!AppState.overtime) return;
       flushOvertimeCredit();
       AudioEngine.playSound("start");
@@ -3097,6 +3115,7 @@
     }
 
     function toggle() {
+      AppState.sessionCompleted = false;
       AppState.running = !AppState.running;
       AppState.stageStarted = true;
       if (AppState.running) {
@@ -3109,6 +3128,7 @@
     }
 
     function advance(complete) {
+      AppState.sessionCompleted = Boolean(complete);
       flushOvertimeCredit();
       const wasFocus = AppState.isFocus();
 
@@ -3154,6 +3174,7 @@
     }
 
     function reset() {
+      AppState.sessionCompleted = false;
       flushOvertimeCredit();
       AppState.running = false;
       AppState.stageStarted = false;
