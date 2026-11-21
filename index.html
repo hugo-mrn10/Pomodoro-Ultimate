@@ -131,7 +131,7 @@
     font-feature-settings: "tnum" 1;
     letter-spacing: -0.03em;
     transform: none;
-    opacity: 1;
+    opacity: 0;
     position: relative;
     z-index: 2;
     background-repeat: no-repeat;
@@ -3503,6 +3503,7 @@
     fontLoads,
     new Promise(resolve => setTimeout(resolve, 800))
   ]).then(revealTimer);
+  setTimeout(revealTimer, 1200);
 
   if (document.fonts) {
     if (document.fonts.ready) document.fonts.ready.then(TypographyEngine.clearCacheAndRefit);
