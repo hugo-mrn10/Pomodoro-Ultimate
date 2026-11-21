@@ -8,9 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Pomodoro Ultimate">
 <link rel="manifest" href="manifest.webmanifest?v=1795264952">
-<link rel="icon" type="image/svg+xml" href="icons/icon.svg?v=1795264952">
-<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png?v=1795264952">
-<link rel="icon" href="favicon.ico?v=1795264952">
+<link id="dynamic-favicon" rel="icon" type="image/png" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png?v=1795264952">
 <title>Pomodoro Ultimate</title>
 <link rel="preload" href="fonts/font-02.woff2" as="font" type="font/woff2" crossorigin>
@@ -2564,45 +2562,69 @@
     faviconCanvas.width = 64;
     faviconCanvas.height = 64;
     const faviconCtx = faviconCanvas.getContext("2d");
-    let faviconLink = document.querySelector('link[rel~="icon"]');
-    if (!faviconLink) {
-      faviconLink = document.createElement("link");
-      faviconLink.rel = "icon";
-      faviconLink.type = "image/png";
-      document.head.appendChild(faviconLink);
+    let faviconLink = document.getElementById("dynamic-favicon") || document.querySelector('link[rel~="icon"]');
+  document.querySelectorAll('link[rel~="icon"]').forEach((node) => {
+    if (node !== faviconLink) node.remove();
+  });
+  if (!faviconLink) {
+    faviconLink = document.createElement("link");
+    faviconLink.id = "dynamic-favicon";
+    faviconLink.rel = "icon";
+    faviconLink.type = "image/png";
+    document.head.appendChild(faviconLink);
+  }
+  let lastFaviconKey = "";
+  const darkModeQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+
+  function isDarkTheme() {
+    return !darkModeQuery || darkModeQuery.matches;
+  }
+
+  function updateFavicon(progressPct) {
+    if (!faviconCtx) return;
+    const ratio = Math.max(0, Math.min(1, progressPct / 100));
+    const step = Math.round(ratio * 120);
+    const dark = isDarkTheme();
+    const key = `${step}-${running ? 1 : 0}-${dark ? 1 : 0}`;
+    if (key === lastFaviconKey) return;
+    lastFaviconKey = key;
+
+    const cx = 32;
+    const cy = 32;
+    const r = 30;
+    const activeColor = dark ? "#ffffff" : "#1c1c1e";
+    const pausedColor = dark ? "rgba(255, 255, 255, 0.78)" : "rgba(28, 28, 30, 0.72)";
+    faviconCtx.clearRect(0, 0, 64, 64);
+
+    if (ratio > 0) {
+      faviconCtx.beginPath();
+      if (ratio < 0.999) faviconCtx.moveTo(cx, cy);
+      faviconCtx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + ratio * Math.PI * 2);
+      if (ratio < 0.999) faviconCtx.closePath();
+      faviconCtx.fillStyle = running ? activeColor : pausedColor;
+      faviconCtx.fill();
+    } else {
+      faviconCtx.beginPath();
+      faviconCtx.moveTo(cx, cy);
+      faviconCtx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + (2 / 3) * Math.PI * 2);
+      faviconCtx.closePath();
+      faviconCtx.fillStyle = pausedColor;
+      faviconCtx.fill();
     }
-    let lastFaviconKey = "";
-    const darkModeQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
 
-    function updateFavicon(progressPct) {
-      if (!faviconCtx) return;
-      const ratio = Math.max(0, Math.min(1, progressPct / 100));
-      const step = Math.round(ratio * 120);
-      const dark = !darkModeQuery || darkModeQuery.matches;
-      const key = `${step}-${AppState.running ? 1 : 0}-${dark ? 1 : 0}`;
-      if (key === lastFaviconKey) return;
-      lastFaviconKey = key;
-
-      const cx = 32, cy = 32, r = 30;
-      const activeColor = dark ? "#ffffff" : "#1c1c1e";
-      const pausedColor = dark ? "rgba(255, 255, 255, 0.78)" : "rgba(28, 28, 30, 0.72)";
-      faviconCtx.clearRect(0, 0, 64, 64);
-
-      if (ratio > 0) {
-        faviconCtx.beginPath();
-        if (ratio < 0.999) faviconCtx.moveTo(cx, cy);
-        faviconCtx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + ratio * Math.PI * 2);
-        if (ratio < 0.999) faviconCtx.closePath();
-        faviconCtx.fillStyle = AppState.running ? activeColor : pausedColor;
-        faviconCtx.fill();
-      } else {
-        faviconCtx.beginPath();
-        faviconCtx.arc(cx, cy, 5, 0, Math.PI * 2);
-        faviconCtx.fillStyle = pausedColor;
-        faviconCtx.fill();
-      }
-      faviconLink.href = faviconCanvas.toDataURL("image/png");
+    const dataUrl = faviconCanvas.toDataURL("image/png");
+    const nextLink = document.createElement("link");
+    nextLink.id = "dynamic-favicon";
+    nextLink.rel = "icon";
+    nextLink.type = "image/png";
+    nextLink.href = dataUrl;
+    if (faviconLink && faviconLink.parentNode) {
+      faviconLink.parentNode.replaceChild(nextLink, faviconLink);
+    } else {
+      document.head.appendChild(nextLink);
     }
+    faviconLink = nextLink;
+  }
 
     if (darkModeQuery) {
       const onThemeChange = () => {
