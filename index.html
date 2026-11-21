@@ -56,262 +56,6 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-  /* ---------- Pop-up compact : Apple Inset Grouped & Control Center ---------- */
-  #popup {
-    width: min(334px, calc(100vw - 24px)) !important;
-    padding: 14px !important;
-    border-radius: 28px !important;
-  }
-  #popup .popup-header {
-    padding: 0 4px;
-    margin-bottom: 10px;
-  }
-  #popup .popup-title {
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    text-transform: none;
-    color: rgba(255, 255, 255, 0.92);
-  }
-
-  /* Groupes translucides iOS Inset Grouped */
-  .ig-group {
-    background: rgba(255, 255, 255, 0.065);
-    border: 0.5px solid rgba(255, 255, 255, 0.09);
-    border-radius: 18px;
-    margin-bottom: 8px;
-    overflow: hidden;
-  }
-  .ig-row {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 38px;
-    padding: 6px 13px;
-    gap: 12px;
-    margin: 0 !important;
-  }
-  .ig-row + .ig-row::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 13px;
-    right: 0;
-    height: 0.5px;
-    background: rgba(255, 255, 255, 0.085);
-    pointer-events: none;
-  }
-  .ig-row label {
-    font-size: 13.5px;
-    font-weight: 450;
-    letter-spacing: -0.01em;
-    color: rgba(255, 255, 255, 0.92);
-    flex: 1;
-    white-space: nowrap;
-  }
-
-  /* Segmented Control (iOS / macOS) */
-  .ig-segment-wrap {
-    padding: 8px 10px;
-  }
-  .ig-group .preset-pills {
-    background: rgba(0, 0, 0, 0.28);
-    padding: 3px;
-    border-radius: 12px;
-    gap: 2px;
-  }
-  .ig-group .preset-pill {
-    padding: 5px 8px;
-    border-radius: 9px;
-    background: transparent;
-    color: rgba(255, 255, 255, 0.68);
-    font-size: 12.5px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-  }
-  .ig-group .preset-pill:hover {
-    background: rgba(255, 255, 255, 0.06);
-    color: #fff;
-  }
-  .ig-group .preset-pill.active {
-    background: rgba(255, 255, 255, 0.18);
-    color: #fff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28), inset 0 0.5px 0 rgba(255, 255, 255, 0.18);
-  }
-
-  /* Compteurs de durée empilés + Apply intégré */
-  .ig-duration-bar {
-    position: relative;
-    display: flex;
-    align-items: center;
-    padding: 6px 10px 7px;
-    gap: 6px;
-  }
-  .ig-duration-bar::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 10px;
-    right: 10px;
-    height: 0.5px;
-    background: rgba(255, 255, 255, 0.085);
-  }
-  .ig-group .time-inputs {
-    flex: 1 1 auto;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0;
-  }
-  .ig-group .time-field {
-    position: relative;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border-radius: 0;
-    padding: 2px 4px;
-    gap: 1px;
-  }
-  .ig-group .time-field + .time-field::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 4px;
-    bottom: 4px;
-    width: 0.5px;
-    background: rgba(255, 255, 255, 0.1);
-  }
-  .ig-group .time-field span {
-    font-size: 10.5px;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.48);
-    letter-spacing: 0.01em;
-  }
-  .ig-group .time-field input {
-    width: 100%;
-    text-align: center;
-    font-size: 15px;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    padding: 0;
-    color: #fff;
-  }
-  .ig-apply-btn {
-    flex: 0 0 auto;
-    height: 32px;
-    padding: 0 13px;
-    margin: 0;
-    border: none;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.15);
-    color: #fff;
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 12.5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.16s ease, transform 0.12s ease;
-  }
-  .ig-apply-btn:hover {
-    background: rgba(255, 255, 255, 0.24);
-  }
-  .ig-apply-btn:active {
-    transform: scale(0.96);
-  }
-
-  /* Champ d'intention sans boîte imbriquée */
-  .ig-group .intent-input {
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    padding: 2px 0;
-    font-size: 13px;
-    font-weight: 450;
-    color: #fff;
-  }
-  .ig-group .intent-input:focus {
-    background: transparent;
-    border-color: transparent;
-  }
-  .ig-group .intent-input::placeholder {
-    color: rgba(255, 255, 255, 0.36);
-  }
-
-  /* Slider volume style Apple Control Center */
-  .ig-group #vol-slider {
-    width: 132px;
-    height: 5px;
-    border-radius: 99px;
-    background: linear-gradient(
-      to right,
-      rgba(255, 255, 255, 0.92) var(--vol-pct, 100%),
-      rgba(255, 255, 255, 0.2) var(--vol-pct, 100%)
-    );
-  }
-  .ig-group #vol-slider::-webkit-slider-thumb {
-    width: 16px;
-    height: 16px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
-  }
-  .ig-group #vol-slider::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
-  }
-
-  /* Sélecteur de source façon réglages iOS (aligné à droite) */
-  .ig-select-wrap {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-  }
-  .ig-group .select-field {
-    appearance: none;
-    -webkit-appearance: none;
-    background: transparent;
-    padding: 4px 16px 4px 6px;
-    font-size: 13px;
-    font-weight: 450;
-    color: rgba(255, 255, 255, 0.62);
-    text-align: right;
-    text-align-last: right;
-    max-width: 175px;
-  }
-  .ig-group .select-field:hover {
-    background: transparent;
-    color: rgba(255, 255, 255, 0.88);
-  }
-  .ig-select-chevron {
-    position: absolute;
-    right: 2px;
-    pointer-events: none;
-    color: rgba(255, 255, 255, 0.38);
-    font-size: 11px;
-  }
-
-  /* Pied de page : statistiques discrètes + actions */
-  .ig-footer-stats {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 2px 6px 8px;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.52);
-  }
-  .ig-footer-stats strong {
-    color: rgba(255, 255, 255, 0.88);
-    font-weight: 600;
-  }
-  #popup .popup-actions {
-    margin-top: 0;
-    gap: 6px;
-  }
-  #popup .btn-hold-action {
-    padding: 9px 10px;
-    border-radius: 14px;
-    font-size: 12.5px;
-    font-weight: 600;
-  }
 </style>
 <style>
   :root {
@@ -1195,6 +939,397 @@
     margin-top: 3px;
   }
 </style>
+<style id="apple-hig-popup-style">
+  /* ---------- Apple HIG Clean Compact : Lignes épurées sans grille latérale ---------- */
+  #popup,
+  #popup * {
+    outline: none;
+  }
+  #popup *:focus-visible {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.55);
+  }
+
+  #popup {
+    width: 336px;
+    max-width: calc(100vw - 20px);
+    padding: 11px 12px;
+    border-radius: 24px;
+    border: 1px solid var(--hairline-border);
+  }
+
+  #popup-grabber {
+    display: none;
+  }
+
+  #popup .popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px;
+    margin-bottom: 7px;
+  }
+  #popup .popup-title {
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-transform: none;
+    color: rgba(255, 255, 255, 0.92);
+    margin: 0;
+  }
+  #popup .btn-info-icon {
+    width: 22px;
+    height: 22px;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  /* Groupes translucides épurés */
+  .hig-group {
+    background: rgba(255, 255, 255, 0.065);
+    border: none;
+    border-radius: 14px;
+    margin-bottom: 6px;
+    overflow: hidden;
+  }
+  .hig-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 32px;
+    padding: 4px 12px;
+    gap: 12px;
+    margin: 0;
+    border: none;
+  }
+  .hig-row + .hig-row::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 12px;
+    right: 12px;
+    height: 0.5px;
+    background: rgba(255, 255, 255, 0.075);
+    pointer-events: none;
+  }
+  .hig-row label {
+    font-size: 12.5px;
+    font-weight: 450;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.92);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Interrupteurs iOS proportionnés */
+  #popup .switch {
+    width: 36px;
+    height: 21px;
+    border-radius: 10.5px;
+  }
+  #popup .switch::after {
+    top: 2.5px;
+    left: 2.5px;
+    width: 16px;
+    height: 16px;
+  }
+  #popup .switch.active::after {
+    transform: translateX(15px);
+  }
+
+  /* Segmented Control natif Apple */
+  .hig-segment-wrap {
+    padding: 6px 8px;
+  }
+  .hig-group .preset-pills {
+    display: flex;
+    background: rgba(0, 0, 0, 0.26);
+    padding: 2.5px;
+    border-radius: 10px;
+    gap: 2px;
+    border: none;
+  }
+  .hig-group .preset-pill {
+    flex: 1 1 0;
+    padding: 4px 6px;
+    border: none;
+    border-radius: 7.5px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .hig-group .preset-pill:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+  }
+  .hig-group .preset-pill.active {
+    background: rgba(255, 255, 255, 0.19);
+    color: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.26);
+  }
+
+  /* Compteurs de durée + Apply intégré */
+  .hig-duration-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 5px 8px 6px;
+    gap: 6px;
+  }
+  .hig-duration-bar::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 8px;
+    right: 8px;
+    height: 0.5px;
+    background: rgba(255, 255, 255, 0.075);
+  }
+  .hig-group .time-inputs {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+  .hig-group .time-field {
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 1px 3px;
+    gap: 0;
+  }
+  .hig-group .time-field + .time-field::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 3px;
+    bottom: 3px;
+    width: 0.5px;
+    background: rgba(255, 255, 255, 0.09);
+  }
+  .hig-group .time-field span {
+    font-size: 10px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.46);
+    line-height: 1.15;
+  }
+  .hig-group .time-field input {
+    width: 100%;
+    text-align: center;
+    font-size: 14.5px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #fff;
+    line-height: 1.2;
+  }
+  .hig-apply-btn {
+    flex: 0 0 auto;
+    height: 28px;
+    padding: 0 12px;
+    margin: 0;
+    border: none;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.16s ease, transform 0.12s ease;
+  }
+  .hig-apply-btn:hover {
+    background: rgba(255, 255, 255, 0.24);
+  }
+  .hig-apply-btn:active {
+    transform: scale(0.96);
+  }
+
+  /* Champ d'intention intégré */
+  .hig-group .intent-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 1px 0;
+    font-size: 12.5px;
+    font-weight: 450;
+    color: #fff;
+  }
+  .hig-group .intent-input:focus {
+    background: transparent;
+    border: none;
+  }
+  .hig-group .intent-input::placeholder {
+    color: rgba(255, 255, 255, 0.36);
+  }
+
+  /* Slider volume style Apple Control Center */
+  .hig-group #vol-slider {
+    width: 148px;
+    height: 4px;
+    border: none;
+    border-radius: 99px;
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.92) var(--vol-pct, 100%),
+      rgba(255, 255, 255, 0.2) var(--vol-pct, 100%)
+    );
+  }
+  .hig-group #vol-slider::-webkit-slider-thumb {
+    width: 14px;
+    height: 14px;
+    border: none;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  }
+  .hig-group #vol-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border: none;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  }
+
+  /* Sélecteur de source façon réglages iOS (aligné à droite) */
+  .hig-select-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+  .hig-group .select-field {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: transparent;
+    padding: 2px 15px 2px 4px;
+    font-size: 12.5px;
+    font-weight: 450;
+    color: rgba(255, 255, 255, 0.62);
+    text-align: right;
+    text-align-last: right;
+    max-width: 165px;
+  }
+  .hig-group .select-field:hover {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  .hig-select-chevron {
+    position: absolute;
+    right: 2px;
+    pointer-events: none;
+    color: rgba(255, 255, 255, 0.38);
+    display: inline-flex;
+  }
+
+  /* Statistiques discrètes + boutons d'action compacts */
+  .hig-footer-stats {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1px 6px 6px;
+    font-size: 11.5px;
+    color: rgba(255, 255, 255, 0.5);
+  }
+  .hig-footer-stats strong {
+    color: rgba(255, 255, 255, 0.88);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  #popup .popup-actions {
+    margin-top: 0;
+    gap: 5px;
+  }
+  #popup .btn-hold-action {
+    border: none;
+    padding: 7px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.085);
+  }
+  #popup .btn-hold-action:hover {
+    background: rgba(255, 255, 255, 0.14);
+  }
+  #popup .btn-hold-action.btn-danger-hold {
+    background: rgba(255, 69, 58, 0.16);
+    color: #ff6961;
+  }
+
+  /* ---------- Adaptation Mobile : iOS Bottom Sheet Compact ---------- */
+  @media (max-width: 600px), (hover: none) and (pointer: coarse) {
+    #popup {
+      top: auto;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      max-width: 100%;
+      max-height: 82dvh;
+      border-radius: 26px 26px 0 0;
+      border-left: none;
+      border-right: none;
+      border-bottom: none;
+      padding: 8px 14px calc(14px + env(safe-area-inset-bottom));
+      transform-origin: bottom center;
+      transform: translateY(100%);
+      filter: none;
+      transition:
+        transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.24s ease;
+    }
+    #popup.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    #popup-grabber {
+      display: block;
+      width: 36px;
+      height: 4px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, 0.28);
+      margin: 0 auto 8px;
+      cursor: grab;
+    }
+    .hig-row {
+      min-height: 38px;
+      padding: 6px 14px;
+    }
+    .hig-row label {
+      font-size: 13.5px;
+    }
+    #popup .switch {
+      width: 40px;
+      height: 24px;
+      border-radius: 12px;
+    }
+    #popup .switch::after {
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+    }
+    #popup .switch.active::after {
+      transform: translateX(16px);
+    }
+    .hig-apply-btn {
+      height: 32px;
+      padding: 0 14px;
+    }
+    #popup .btn-hold-action {
+      padding: 9px 10px;
+      font-size: 13px;
+    }
+  }
+</style>
 </head>
 <body>
   <!-- Arrière-plan normal & voile de contraste -->
@@ -1216,10 +1351,11 @@
   <div id="top-pill" aria-hidden="true"></div>
 
   <div id="popup">
+    <div id="popup-grabber" aria-hidden="true"></div>
     <div class="popup-header">
       <div class="popup-title">Settings</div>
       <button type="button" id="btn-info" class="btn-info-icon" aria-label="Controls &amp; Credits" title="Controls &amp; Credits">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="12" y1="16" x2="12" y2="12"></line>
           <line x1="12" y1="8" x2="12.01" y2="8"></line>
@@ -1227,15 +1363,15 @@
       </button>
     </div>
 
-    <div class="ig-group">
-      <div class="ig-segment-wrap">
+    <div class="hig-group">
+      <div class="hig-segment-wrap">
         <div class="preset-pills" role="group" aria-label="Duration presets">
           <button type="button" class="preset-pill active" data-focus="25" data-break="5" data-long="15">25 / 5</button>
           <button type="button" class="preset-pill" data-focus="50" data-break="10" data-long="20">50 / 10</button>
           <button type="button" class="preset-pill" data-focus="90" data-break="20" data-long="30">90 / 20</button>
         </div>
       </div>
-      <div class="ig-duration-bar">
+      <div class="hig-duration-bar">
         <div class="time-inputs">
           <div class="time-field">
             <span>Focus</span>
@@ -1250,52 +1386,52 @@
             <input type="number" id="long-break-dur" value="15" min="1" max="120" aria-label="Long break minutes">
           </div>
         </div>
-        <button type="button" class="ig-apply-btn" id="apply-config">Apply</button>
+        <button type="button" class="hig-apply-btn" id="apply-config">Apply</button>
       </div>
     </div>
 
-    <div class="ig-group">
-      <div class="ig-row">
+    <div class="hig-group">
+      <div class="hig-row">
         <label for="autostart-toggle">Auto-start</label>
         <div id="autostart-toggle" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
       </div>
-      <div class="ig-row">
+      <div class="hig-row">
         <label for="overtime-toggle">Overtime</label>
         <div id="overtime-toggle" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
       </div>
-      <div class="ig-row">
+      <div class="hig-row">
         <label for="notif-toggle">Notifications</label>
         <div id="notif-toggle" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
       </div>
-      <div class="ig-row">
+      <div class="hig-row">
         <label for="progress-toggle">Progress bar</label>
         <div id="progress-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
       </div>
-      <div class="ig-row">
+      <div class="hig-row">
         <input type="text" id="session-intent-input" class="intent-input" maxlength="80" placeholder="Session intention…" aria-label="Session intention">
       </div>
     </div>
 
-    <div class="ig-group">
-      <div class="ig-row">
+    <div class="hig-group">
+      <div class="hig-row">
         <label for="noise-toggle">Brown noise</label>
         <div id="noise-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
       </div>
-      <div class="ig-row">
+      <div class="hig-row">
         <label for="tick-toggle">Watch tick</label>
         <div id="tick-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
       </div>
-      <div class="ig-row">
+      <div class="hig-row">
         <label for="vol-slider">Volume</label>
         <input type="range" id="vol-slider" min="0" max="100" value="100">
       </div>
-      <div class="ig-row">
+      <div class="hig-row">
         <label for="bg-toggle">Nature break</label>
         <div id="bg-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
       </div>
-      <div class="ig-row">
+      <div class="hig-row">
         <label for="bg-source">Source</label>
-        <div class="ig-select-wrap">
+        <div class="hig-select-wrap">
           <select id="bg-source" class="select-field">
             <option value="auto" selected>Automatic</option>
             <option value="local">Local (Offline)</option>
@@ -1303,12 +1439,16 @@
             <option value="wikimedia">Wikimedia</option>
             <option value="bing-nature">Bing Archive</option>
           </select>
-          <span class="ig-select-chevron" aria-hidden="true">⌄</span>
+          <span class="hig-select-chevron" aria-hidden="true">
+            <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 1l4 4 4-4"/>
+            </svg>
+          </span>
         </div>
       </div>
     </div>
 
-    <div class="ig-footer-stats">
+    <div class="hig-footer-stats">
       <span>Today · <strong id="pomodoro-count">0</strong></span>
       <span>7 days · <strong id="weekly-focus-total">0m</strong></span>
     </div>
@@ -1945,18 +2085,10 @@
       }
     }
 
-    async function playWatchTick(preview = false) {
-      if (!preview && (!isSwitchActive(DOM.tickToggle) || !AppState.isFocus())) return;
-      const ctx = getCtx();
-      if (!ctx || !masterGain) return;
+    let tickSchedulerTimer = null;
+    let nextTickAudioTime = 0;
 
-      if (ctx.state !== "running") {
-        try { await ctx.resume(); } catch (e) { return; }
-      }
-      if (ctx.state !== "running") return;
-      if (!preview && (!isSwitchActive(DOM.tickToggle) || !AppState.isFocus())) return;
-
-      const now = ctx.currentTime;
+    function scheduleTickBurstAt(ctx, when) {
       if (!watchTickNoiseBuffer) {
         const length = Math.ceil(ctx.sampleRate * 0.045);
         watchTickNoiseBuffer = ctx.createBuffer(1, length, ctx.sampleRate);
@@ -1974,32 +2106,99 @@
         watchTickFilter.connect(masterGain);
       }
 
+      const t = Math.max(ctx.currentTime + 0.002, when);
       const noise = ctx.createBufferSource();
       noise.buffer = watchTickNoiseBuffer;
       const clickGain = ctx.createGain();
-      clickGain.gain.setValueAtTime(0.0001, now);
-      clickGain.gain.exponentialRampToValueAtTime(0.85, now + 0.0012);
-      clickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.024);
+      clickGain.gain.setValueAtTime(0.0001, t);
+      clickGain.gain.exponentialRampToValueAtTime(0.95, t + 0.0012);
+      clickGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.024);
       noise.connect(clickGain).connect(watchTickFilter);
       noise.onended = () => {
         try { noise.disconnect(); clickGain.disconnect(); } catch (e) {}
       };
-      noise.start(now);
-      noise.stop(now + 0.026);
+      noise.start(t);
+      noise.stop(t + 0.026);
 
       const resonator = ctx.createOscillator();
       const resonanceGain = ctx.createGain();
       resonator.type = "triangle";
-      resonator.frequency.setValueAtTime(1420, now);
-      resonanceGain.gain.setValueAtTime(0.0001, now);
-      resonanceGain.gain.exponentialRampToValueAtTime(0.12, now + 0.001);
-      resonanceGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.038);
+      resonator.frequency.setValueAtTime(1420, t);
+      resonanceGain.gain.setValueAtTime(0.0001, t);
+      resonanceGain.gain.exponentialRampToValueAtTime(0.14, t + 0.001);
+      resonanceGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.038);
       resonator.connect(resonanceGain).connect(masterGain);
       resonator.onended = () => {
         try { resonator.disconnect(); resonanceGain.disconnect(); } catch (e) {}
       };
-      resonator.start(now);
-      resonator.stop(now + 0.042);
+      resonator.start(t);
+      resonator.stop(t + 0.042);
+    }
+
+    function playWatchTick(preview = false) {
+      if (!preview && (!isSwitchActive(DOM.tickToggle) || !AppState.isFocus())) return;
+      const ctx = getCtx();
+      if (!ctx || !masterGain) return;
+      if (ctx.state !== "running") {
+        ctx.resume().then(() => {
+          if (ctx.state === "running") scheduleTickBurstAt(ctx, ctx.currentTime + 0.005);
+        }).catch(() => {});
+        return;
+      }
+      scheduleTickBurstAt(ctx, ctx.currentTime + 0.005);
+    }
+
+    function stopTickScheduler() {
+      if (tickSchedulerTimer !== null) {
+        clearInterval(tickSchedulerTimer);
+        tickSchedulerTimer = null;
+      }
+      nextTickAudioTime = 0;
+    }
+
+    function syncTickScheduler() {
+      const shouldTick = isSwitchActive(DOM.tickToggle) && AppState.running && AppState.isFocus();
+      if (!shouldTick) {
+        stopTickScheduler();
+        return;
+      }
+      const ctx = getCtx();
+      if (!ctx || !masterGain) return;
+      if (ctx.state !== "running") {
+        ctx.resume().catch(() => {});
+      }
+
+      if (tickSchedulerTimer === null) {
+        // Aligner la grille audio exacte de 1.000 s sur la prochaine seconde affichée
+        const fracToNextSec = AppState.overtime
+          ? (1 - (AppState.getOvertimeSec() % 1))
+          : (AppState.remaining - Math.floor(AppState.remaining));
+        const delaySec = fracToNextSec > 0.03 ? fracToNextSec : 1.0;
+        nextTickAudioTime = ctx.currentTime + delaySec;
+
+        const pump = () => {
+          if (!isSwitchActive(DOM.tickToggle) || !AppState.running || !AppState.isFocus()) {
+            stopTickScheduler();
+            return;
+          }
+          if (ctx.state !== "running") {
+            ctx.resume().catch(() => {});
+            return;
+          }
+          const now = ctx.currentTime;
+          if (nextTickAudioTime < now - 0.15) {
+            nextTickAudioTime = now + 0.02;
+          }
+          // Lookahead matériel de 180 ms : zéro tic manqué même si l'UI est occupée
+          while (nextTickAudioTime < now + 0.18) {
+            scheduleTickBurstAt(ctx, nextTickAudioTime);
+            nextTickAudioTime += 1.0;
+          }
+        };
+
+        pump();
+        tickSchedulerTimer = setInterval(pump, 50);
+      }
     }
 
     function playSound(name) {
@@ -2190,6 +2389,7 @@
       showVolumeIndicator,
       toggleMute,
       playWatchTick,
+      syncTickScheduler,
       playSound,
       updateBrownNoise
     };
@@ -3318,10 +3518,6 @@
       const { immediateFit = false } = opts;
       const text = getDisplayTimeText();
 
-      if (AppState.running && AppState.isFocus() && lastRenderedTimerIndex === AppState.idx &&
-          lastRenderedTimeText !== null && text !== lastRenderedTimeText) {
-        AudioEngine.playWatchTick();
-      }
       lastRenderedTimeText = text;
       lastRenderedTimerIndex = AppState.idx;
 
@@ -3367,6 +3563,7 @@
       }
 
       AudioEngine.updateBrownNoise();
+      AudioEngine.syncTickScheduler();
       BreakBackgroundManager.update();
     }
 
@@ -3463,6 +3660,7 @@
         render();
       } else if (AppState.isFocus() && (AppState.remaining <= 3.1 || (AppState.remaining <= 35 && AppState.remaining >= 34.5))) {
         AudioEngine.updateBrownNoise();
+      AudioEngine.syncTickScheduler();
         BreakBackgroundManager.update();
       }
     }
@@ -3698,6 +3896,20 @@
       }
     }
 
+    let sheetTouchStartY = 0;
+    DOM.popup.addEventListener("touchstart", (e) => {
+      if (e.touches && e.touches.length === 1) {
+        sheetTouchStartY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+    DOM.popup.addEventListener("touchend", (e) => {
+      if (!DOM.popup.classList.contains("visible") || !e.changedTouches || !e.changedTouches.length) return;
+      const dy = e.changedTouches[0].clientY - sheetTouchStartY;
+      if (DOM.popup.scrollTop <= 0 && dy > 64) {
+        closePopup();
+      }
+    }, { passive: true });
+
     let ptrMoveScheduled = false;
     window.addEventListener("pointermove", () => {
       if (ptrMoveScheduled || DOM.popup.classList.contains("visible")) return;
@@ -3785,6 +3997,7 @@
         AudioEngine.getCtx();
         setSwitchState(DOM.noiseToggle, !isSwitchActive(DOM.noiseToggle));
         AudioEngine.updateBrownNoise();
+      AudioEngine.syncTickScheduler();
         StorageManager.savePrefs();
       } else if (e.code === "KeyM") {
         e.preventDefault();
@@ -3824,6 +4037,7 @@
     bindSwitch(DOM.noiseToggle, () => {
       AudioEngine.getCtx();
       AudioEngine.updateBrownNoise();
+      AudioEngine.syncTickScheduler();
     });
 
     bindSwitch(DOM.progressToggle, () => {
@@ -3832,7 +4046,8 @@
 
     bindSwitch(DOM.tickToggle, (active) => {
       AudioEngine.getCtx();
-      if (active) AudioEngine.playWatchTick(true);
+      AudioEngine.syncTickScheduler();
+      if (active && !AppState.running) AudioEngine.playWatchTick(true);
     });
 
     bindSwitch(DOM.notifToggle, (active) => {
