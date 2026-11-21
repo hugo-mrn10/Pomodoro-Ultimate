@@ -18,19 +18,18 @@
   </p>
 </div>
 
-<p align="center">
-  <img src="screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-26-14.png" alt="Focus mode" width="100%" />
-</p>
-
-| Nature Break | Settings & Controls |
-| :---: | :---: |
-| <img src="screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-27-56.png" alt="Nature Break" width="100%" /> | <img src="screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-26-48.png" alt="Settings" width="100%" /> |
-| **Active Focus** | **Session Intention & Cycle** |
-| <img src="screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-26-27.png" alt="Active Focus" width="100%" /> | <img src="screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-27-41.png" alt="Session Intention & Cycle" width="100%" /> |
-
-<p align="center">
-  <img src="screenshots/Image%20coll%C3%A9e.png" alt="Controls & Credits" width="49%" />
-</p>
+<table>
+  <tr>
+    <td><img src="screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-26-14.png" alt="" width="100%" /></td>
+    <td><img src="screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-26-27.png" alt="" width="100%" /></td>
+    <td><img src="screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-26-48.png" alt="" width="100%" /></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-27-41.png" alt="" width="100%" /></td>
+    <td><img src="screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-27-56.png" alt="" width="100%" /></td>
+    <td><img src="screenshots/Image%20coll%C3%A9e.png" alt="" width="100%" /></td>
+  </tr>
+</table>
 
 ### Highlights
 
@@ -38,8 +37,7 @@
 | :--- | :--- |
 | **Variable Typography**<br>Google Sans Flex animates weight, width, and roundness between focus and pause states. | **Procedural Web Audio**<br>Brown noise and mechanical watch tick synthesized in real time. Zero audio files. |
 | **Hold to Pause**<br>Hold 3s to pause (1s to resume) to prevent accidental interruptions. | **Hidden Controls**<br>All settings stay invisible until you hover or tap the top pill. |
-| **Curated Nature Breaks**<br>High-resolution landscapes from Wikimedia Commons, Bing Archive, or local offline storage with adaptive contrast. | **Focus Intention & Stats**<br>Optional session intention display, cycle progress dots, and rolling 7-day focus history. |
-| **Live Tab Favicon**<br>The browser tab icon updates in real time as a pie chart of remaining session time. | **Offline-First PWA**<br>Service Worker caching, Media Session controls, and Screen Wake Lock. Works completely offline. |
+| **Live Tab Favicon**<br>The browser tab icon updates in real time as a pie chart of remaining session time. | **Offline-First PWA**<br>Service Worker caching and local storage stats. Works completely offline. |
 
 ### Controls
 
