@@ -1435,6 +1435,7 @@
     let lastNonZeroVolume = DEFAULT_PREFS.volume;
 
     let watchTickNoiseBuffer = null;
+    let watchTickFilter = null;
     let brownNoiseNode = null;
     let noiseGain = null;
     let precomputedBrownSamples = null;
@@ -1444,22 +1445,56 @@
     let volBarHideTimer = null;
     let volSnapTimer = null;
 
+    function syncNoiseGainToState() {
+      if (!noiseGain || !actx || actx.state !== "running") return;
+      const now = actx.currentTime;
+      const target = noiseShouldPlay ? NOISE_VOL : 0;
+      noiseGain.gain.cancelScheduledValues(now);
+      noiseGain.gain.setValueAtTime(noiseGain.gain.value, now);
+      noiseGain.gain.linearRampToValueAtTime(target, now + TRANSITION_S);
+    }
+
     function getCtx() {
       if (!actx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return null;
         try {
-          actx = new (window.AudioContext || window.webkitAudioContext)();
+          actx = new Ctx({ latencyHint: "playback" });
         } catch (e) {
-          return null;
+          try {
+            actx = new Ctx();
+          } catch (e2) {
+            return null;
+          }
         }
         masterGain = actx.createGain();
         masterGain.gain.value = currentVolume;
         masterGain.connect(actx.destination);
+
+        actx.addEventListener("statechange", () => {
+          if (!actx) return;
+          if (actx.state === "running") {
+            applyMasterGain();
+            if (noiseShouldPlay) {
+              ensureBrownNoiseNode();
+              syncNoiseGainToState();
+            }
+          } else if (AppState.running && (noiseShouldPlay || isSwitchActive(DOM.tickToggle))) {
+            actx.resume().catch(() => {});
+          }
+        });
       }
-      if (actx.state === "suspended") {
+      if (actx.state !== "running" && actx.state !== "closed") {
         actx.resume().catch(() => {});
       }
       return actx;
     }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && actx && actx.state !== "running" && AppState.running) {
+        actx.resume().catch(() => {});
+      }
+    });
 
     function applyMasterGain() {
       if (!masterGain || !actx) return;
@@ -1523,7 +1558,7 @@
       const ctx = getCtx();
       if (!ctx || !masterGain) return;
 
-      if (ctx.state === "suspended") {
+      if (ctx.state !== "running") {
         try { await ctx.resume(); } catch (e) { return; }
       }
       if (ctx.state !== "running") return;
@@ -1539,18 +1574,24 @@
           data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 3);
         }
       }
+      if (!watchTickFilter) {
+        watchTickFilter = ctx.createBiquadFilter();
+        watchTickFilter.type = "bandpass";
+        watchTickFilter.frequency.value = 2150;
+        watchTickFilter.Q.value = 1.35;
+        watchTickFilter.connect(masterGain);
+      }
 
       const noise = ctx.createBufferSource();
       noise.buffer = watchTickNoiseBuffer;
-      const filter = ctx.createBiquadFilter();
-      filter.type = "bandpass";
-      filter.frequency.setValueAtTime(2150, now);
-      filter.Q.setValueAtTime(1.35, now);
       const clickGain = ctx.createGain();
       clickGain.gain.setValueAtTime(0.0001, now);
       clickGain.gain.exponentialRampToValueAtTime(0.85, now + 0.0012);
       clickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.024);
-      noise.connect(filter).connect(clickGain).connect(masterGain);
+      noise.connect(clickGain).connect(watchTickFilter);
+      noise.onended = () => {
+        try { noise.disconnect(); clickGain.disconnect(); } catch (e) {}
+      };
       noise.start(now);
       noise.stop(now + 0.026);
 
@@ -1562,6 +1603,9 @@
       resonanceGain.gain.exponentialRampToValueAtTime(0.12, now + 0.001);
       resonanceGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.038);
       resonator.connect(resonanceGain).connect(masterGain);
+      resonator.onended = () => {
+        try { resonator.disconnect(); resonanceGain.disconnect(); } catch (e) {}
+      };
       resonator.start(now);
       resonator.stop(now + 0.042);
     }
@@ -1586,6 +1630,9 @@
         g.gain.exponentialRampToValueAtTime(vol, t + attack);
         g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
         o.connect(g).connect(master);
+        o.onended = () => {
+          try { o.disconnect(); g.disconnect(); } catch (e) {}
+        };
         o.start(t);
         o.stop(t + dur + 0.05);
       }
@@ -1621,21 +1668,30 @@
       if (precomputedBrownSamples && precomputedBrownRate === sampleRate) {
         return precomputedBrownSamples;
       }
-      const bufferSize = sampleRate * 3;
-      const samples = new Float32Array(bufferSize);
+      const durationSec = 12;
+      const bufferSize = sampleRate * durationSec;
+      const fadeLen = Math.min(Math.floor(sampleRate * 0.25), Math.floor(bufferSize / 4));
+      const raw = new Float32Array(bufferSize + fadeLen);
       let lastOut = 0.0;
       let maxAbs = 0;
-      for (let i = 0; i < bufferSize; i++) {
+      for (let i = 0; i < raw.length; i++) {
         const white = Math.random() * 2 - 1;
         const v = (lastOut + (0.02 * white)) / 1.02;
         lastOut = v;
-        samples[i] = v;
+        raw[i] = v;
         const a = v < 0 ? -v : v;
         if (a > maxAbs) maxAbs = a;
       }
-      if (maxAbs > 0) {
-        const k = 0.9 / maxAbs;
-        for (let i = 0; i < bufferSize; i++) samples[i] *= k;
+      const samples = new Float32Array(bufferSize);
+      const k = maxAbs > 0 ? (0.9 / maxAbs) : 1;
+      for (let i = 0; i < bufferSize; i++) {
+        samples[i] = raw[i] * k;
+      }
+      for (let i = 0; i < fadeLen; i++) {
+        const t = i / fadeLen;
+        const fadeIn = Math.sin(t * Math.PI * 0.5);
+        const fadeOut = Math.cos(t * Math.PI * 0.5);
+        samples[i] = samples[i] * fadeIn + (raw[bufferSize + i] * k) * fadeOut;
       }
       precomputedBrownSamples = samples;
       precomputedBrownRate = sampleRate;
@@ -1645,9 +1701,9 @@
     const scheduleIdle = window.requestIdleCallback || (cb => setTimeout(cb, 250));
     scheduleIdle(() => buildBrownNoiseSamples(48000));
 
-    function startBrownNoise() {
+    function ensureBrownNoiseNode() {
       const ctx = getCtx();
-      if (!ctx) return;
+      if (!ctx || !masterGain) return null;
       if (!brownNoiseNode) {
         const samples = buildBrownNoiseSamples(ctx.sampleRate);
         const buffer = ctx.createBuffer(1, samples.length, ctx.sampleRate);
@@ -1667,10 +1723,22 @@
         brownNoiseNode.connect(filter).connect(noiseGain).connect(masterGain);
         brownNoiseNode.start();
       }
-      const now = ctx.currentTime;
-      noiseGain.gain.cancelScheduledValues(now);
-      noiseGain.gain.setValueAtTime(noiseGain.gain.value, now);
-      noiseGain.gain.linearRampToValueAtTime(NOISE_VOL, now + TRANSITION_S);
+      return ctx;
+    }
+
+    function startBrownNoise() {
+      const ctx = ensureBrownNoiseNode();
+      if (!ctx || !noiseGain) return;
+      if (ctx.state === "running") {
+        const now = ctx.currentTime;
+        noiseGain.gain.cancelScheduledValues(now);
+        noiseGain.gain.setValueAtTime(noiseGain.gain.value, now);
+        noiseGain.gain.linearRampToValueAtTime(NOISE_VOL, now + TRANSITION_S);
+      } else {
+        ctx.resume().then(() => {
+          if (noiseShouldPlay) syncNoiseGainToState();
+        }).catch(() => {});
+      }
     }
 
     function stopBrownNoise() {
@@ -1683,7 +1751,12 @@
 
     function updateBrownNoise() {
       const shouldPlay = isSwitchActive(DOM.noiseToggle) && AppState.running && AppState.isFocus();
-      if (shouldPlay === noiseShouldPlay) return;
+      if (shouldPlay === noiseShouldPlay) {
+        if (shouldPlay && actx && actx.state !== "running") {
+          actx.resume().catch(() => {});
+        }
+        return;
+      }
       noiseShouldPlay = shouldPlay;
       if (shouldPlay) startBrownNoise();
       else            stopBrownNoise();
@@ -3564,7 +3637,7 @@
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => reg.update()).catch(() => {});
   });
 }
 </script>
