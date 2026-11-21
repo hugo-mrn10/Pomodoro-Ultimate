@@ -2585,7 +2585,7 @@
     const ratio = Math.max(0, Math.min(1, progressPct / 100));
     const step = Math.round(ratio * 120);
     const dark = isDarkTheme();
-    const key = `${step}-${running ? 1 : 0}-${dark ? 1 : 0}`;
+    const key = `${step}-${AppState.running ? 1 : 0}-${dark ? 1 : 0}`;
     if (key === lastFaviconKey) return;
     lastFaviconKey = key;
 
@@ -2601,7 +2601,7 @@
       if (ratio < 0.999) faviconCtx.moveTo(cx, cy);
       faviconCtx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + ratio * Math.PI * 2);
       if (ratio < 0.999) faviconCtx.closePath();
-      faviconCtx.fillStyle = running ? activeColor : pausedColor;
+      faviconCtx.fillStyle = AppState.running ? activeColor : pausedColor;
       faviconCtx.fill();
     } else {
       faviconCtx.beginPath();

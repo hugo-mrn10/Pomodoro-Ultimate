@@ -1,4 +1,4 @@
-const CACHE_NAME = "pomodoro-ultimate-v1795274954";
+const CACHE_NAME = "pomodoro-ultimate-v1795281626";
 const REMOTE_BG_CACHE = "pomodoro-remote-bg-v1";
 const MAX_REMOTE_BGS = 8;
 
