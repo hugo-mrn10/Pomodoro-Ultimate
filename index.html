@@ -56,64 +56,262 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-  /* ---------- Compartiments compacts du pop-up ---------- */
+  /* ---------- Pop-up compact : Apple Inset Grouped & Control Center ---------- */
   #popup {
-    width: 316px !important;
-    max-width: calc(100vw - 24px) !important;
-    padding: 12px !important;
-    gap: 7px !important;
+    width: min(334px, calc(100vw - 24px)) !important;
+    padding: 14px !important;
+    border-radius: 28px !important;
   }
-  .popup-group {
-    background: rgba(255, 255, 255, 0.055);
-    border: 0.5px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
-    padding: 8px 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+  #popup .popup-header {
+    padding: 0 4px;
+    margin-bottom: 10px;
   }
-  .popup-group-title {
-    font-size: 10px;
+  #popup .popup-title {
+    font-size: 13px;
     font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.42);
-    line-height: 1;
-  }
-  .popup-grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px 10px;
-    align-items: center;
-  }
-  .popup-grid-2 .row {
-    min-width: 0;
-    gap: 6px;
-    margin: 0;
-  }
-  .popup-grid-2 .row label {
-    font-size: 12px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .timer-apply-row {
-    display: flex;
-    align-items: flex-end;
-    gap: 6px;
-  }
-  .timer-apply-row .time-inputs {
-    flex: 1 1 auto;
-    min-width: 0;
-  }
-  .timer-apply-row #apply-btn {
-    width: auto !important;
-    flex: 0 0 auto;
-    padding: 0 12px !important;
-    height: 29px;
-    margin: 0 !important;
+    letter-spacing: -0.01em;
+    text-transform: none;
+    color: rgba(255, 255, 255, 0.92);
   }
 
+  /* Groupes translucides iOS Inset Grouped */
+  .ig-group {
+    background: rgba(255, 255, 255, 0.065);
+    border: 0.5px solid rgba(255, 255, 255, 0.09);
+    border-radius: 18px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .ig-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 38px;
+    padding: 6px 13px;
+    gap: 12px;
+    margin: 0 !important;
+  }
+  .ig-row + .ig-row::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 13px;
+    right: 0;
+    height: 0.5px;
+    background: rgba(255, 255, 255, 0.085);
+    pointer-events: none;
+  }
+  .ig-row label {
+    font-size: 13.5px;
+    font-weight: 450;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.92);
+    flex: 1;
+    white-space: nowrap;
+  }
+
+  /* Segmented Control (iOS / macOS) */
+  .ig-segment-wrap {
+    padding: 8px 10px;
+  }
+  .ig-group .preset-pills {
+    background: rgba(0, 0, 0, 0.28);
+    padding: 3px;
+    border-radius: 12px;
+    gap: 2px;
+  }
+  .ig-group .preset-pill {
+    padding: 5px 8px;
+    border-radius: 9px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .ig-group .preset-pill:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+  }
+  .ig-group .preset-pill.active {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28), inset 0 0.5px 0 rgba(255, 255, 255, 0.18);
+  }
+
+  /* Compteurs de durée empilés + Apply intégré */
+  .ig-duration-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 6px 10px 7px;
+    gap: 6px;
+  }
+  .ig-duration-bar::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 10px;
+    right: 10px;
+    height: 0.5px;
+    background: rgba(255, 255, 255, 0.085);
+  }
+  .ig-group .time-inputs {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+  .ig-group .time-field {
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border-radius: 0;
+    padding: 2px 4px;
+    gap: 1px;
+  }
+  .ig-group .time-field + .time-field::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 0.5px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .ig-group .time-field span {
+    font-size: 10.5px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.48);
+    letter-spacing: 0.01em;
+  }
+  .ig-group .time-field input {
+    width: 100%;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    padding: 0;
+    color: #fff;
+  }
+  .ig-apply-btn {
+    flex: 0 0 auto;
+    height: 32px;
+    padding: 0 13px;
+    margin: 0;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.16s ease, transform 0.12s ease;
+  }
+  .ig-apply-btn:hover {
+    background: rgba(255, 255, 255, 0.24);
+  }
+  .ig-apply-btn:active {
+    transform: scale(0.96);
+  }
+
+  /* Champ d'intention sans boîte imbriquée */
+  .ig-group .intent-input {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 2px 0;
+    font-size: 13px;
+    font-weight: 450;
+    color: #fff;
+  }
+  .ig-group .intent-input:focus {
+    background: transparent;
+    border-color: transparent;
+  }
+  .ig-group .intent-input::placeholder {
+    color: rgba(255, 255, 255, 0.36);
+  }
+
+  /* Slider volume style Apple Control Center */
+  .ig-group #vol-slider {
+    width: 132px;
+    height: 5px;
+    border-radius: 99px;
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.92) var(--vol-pct, 100%),
+      rgba(255, 255, 255, 0.2) var(--vol-pct, 100%)
+    );
+  }
+  .ig-group #vol-slider::-webkit-slider-thumb {
+    width: 16px;
+    height: 16px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  }
+  .ig-group #vol-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  }
+
+  /* Sélecteur de source façon réglages iOS (aligné à droite) */
+  .ig-select-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+  .ig-group .select-field {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    padding: 4px 16px 4px 6px;
+    font-size: 13px;
+    font-weight: 450;
+    color: rgba(255, 255, 255, 0.62);
+    text-align: right;
+    text-align-last: right;
+    max-width: 175px;
+  }
+  .ig-group .select-field:hover {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.88);
+  }
+  .ig-select-chevron {
+    position: absolute;
+    right: 2px;
+    pointer-events: none;
+    color: rgba(255, 255, 255, 0.38);
+    font-size: 11px;
+  }
+
+  /* Pied de page : statistiques discrètes + actions */
+  .ig-footer-stats {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 6px 8px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.52);
+  }
+  .ig-footer-stats strong {
+    color: rgba(255, 255, 255, 0.88);
+    font-weight: 600;
+  }
+  #popup .popup-actions {
+    margin-top: 0;
+    gap: 6px;
+  }
+  #popup .btn-hold-action {
+    padding: 9px 10px;
+    border-radius: 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
 </style>
 <style>
   :root {
@@ -1028,118 +1226,93 @@
         </svg>
       </button>
     </div>
-    <div class="popup-group">
-      <div class="popup-group-title">Timer</div>
-      <div class="row" style="flex-direction:column; align-items:stretch; gap:8px;">
-      <label style="font-size:12px;">Duration (minutes)</label>
-      <div class="preset-pills" role="group" aria-label="Duration presets">
-        <button type="button" class="preset-pill active" data-focus="25" data-break="5" data-long="15">25 / 5</button>
-        <button type="button" class="preset-pill" data-focus="50" data-break="10" data-long="20">50 / 10</button>
-        <button type="button" class="preset-pill" data-focus="90" data-break="20" data-long="30">90 / 20</button>
-      </div>
-      <div class="time-inputs">
-        <div class="time-field">
-          <span>Focus</span>
-          <input type="number" id="focus-dur" value="25" min="1" max="480">
-        </div>
-        <div class="time-field">
-          <span>Break</span>
-          <input type="number" id="break-dur" value="5" min="1" max="60">
-        </div>
-        <div class="time-field">
-          <span>Long</span>
-          <input type="number" id="long-break-dur" value="15" min="1" max="120">
+
+    <div class="ig-group">
+      <div class="ig-segment-wrap">
+        <div class="preset-pills" role="group" aria-label="Duration presets">
+          <button type="button" class="preset-pill active" data-focus="25" data-break="5" data-long="15">25 / 5</button>
+          <button type="button" class="preset-pill" data-focus="50" data-break="10" data-long="20">50 / 10</button>
+          <button type="button" class="preset-pill" data-focus="90" data-break="20" data-long="30">90 / 20</button>
         </div>
       </div>
-    </div>
-      <div class="row" style="flex-direction:column; align-items:stretch; gap:8px;">
-      <label style="font-size:12px;">Duration (minutes)</label>
-      <div class="preset-pills" role="group" aria-label="Duration presets">
-        <button type="button" class="preset-pill active" data-focus="25" data-break="5" data-long="15">25 / 5</button>
-        <button type="button" class="preset-pill" data-focus="50" data-break="10" data-long="20">50 / 10</button>
-        <button type="button" class="preset-pill" data-focus="90" data-break="20" data-long="30">90 / 20</button>
-      </div>
-      <div class="time-inputs">
-        <div class="time-field">
-          <span>Focus</span>
-          <input type="number" id="focus-dur" value="25" min="1" max="480">
+      <div class="ig-duration-bar">
+        <div class="time-inputs">
+          <div class="time-field">
+            <span>Focus</span>
+            <input type="number" id="focus-dur" value="25" min="1" max="480" aria-label="Focus minutes">
+          </div>
+          <div class="time-field">
+            <span>Break</span>
+            <input type="number" id="break-dur" value="5" min="1" max="60" aria-label="Break minutes">
+          </div>
+          <div class="time-field">
+            <span>Long</span>
+            <input type="number" id="long-break-dur" value="15" min="1" max="120" aria-label="Long break minutes">
+          </div>
         </div>
-        <div class="time-field">
-          <span>Break</span>
-          <input type="number" id="break-dur" value="5" min="1" max="60">
-        </div>
-        <div class="time-field">
-          <span>Long</span>
-          <input type="number" id="long-break-dur" value="15" min="1" max="120">
-        </div>
+        <button type="button" class="ig-apply-btn" id="apply-config">Apply</button>
       </div>
     </div>
-    </div>
-    <div class="popup-group">
-      <div class="popup-group-title">Flow</div>
-      <div class="row" style="flex-direction:column; align-items:stretch; gap:6px;">
-      <label for="session-intent-input" style="font-size:12px;">Session intention</label>
-      <input type="text" id="session-intent-input" class="intent-input" maxlength="80" placeholder="Optional focus intention…">
-    </div>
-      <div class="popup-grid-2">
-        <div class="row">
-      <label for="autostart-toggle">Auto-start</label>
-      <div id="autostart-toggle" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
-    </div>
-        <div class="row">
-      <label for="overtime-toggle">Overtime</label>
-      <div id="overtime-toggle" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
-    </div>
-        <div class="row">
-      <label for="notif-toggle">Notifications</label>
-      <div id="notif-toggle" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
-    </div>
+
+    <div class="ig-group">
+      <div class="ig-row">
+        <label for="autostart-toggle">Auto-start</label>
+        <div id="autostart-toggle" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
+      </div>
+      <div class="ig-row">
+        <label for="overtime-toggle">Overtime</label>
+        <div id="overtime-toggle" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
+      </div>
+      <div class="ig-row">
+        <label for="notif-toggle">Notifications</label>
+        <div id="notif-toggle" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
+      </div>
+      <div class="ig-row">
+        <label for="progress-toggle">Progress bar</label>
+        <div id="progress-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
+      </div>
+      <div class="ig-row">
+        <input type="text" id="session-intent-input" class="intent-input" maxlength="80" placeholder="Session intention…" aria-label="Session intention">
       </div>
     </div>
-    <div class="popup-group">
-      <div class="popup-group-title">Audio</div>
-      <div class="row">
-      <label for="noise-toggle">Brown noise</label>
-      <div id="noise-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
+
+    <div class="ig-group">
+      <div class="ig-row">
+        <label for="noise-toggle">Brown noise</label>
+        <div id="noise-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
+      </div>
+      <div class="ig-row">
+        <label for="tick-toggle">Watch tick</label>
+        <div id="tick-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
+      </div>
+      <div class="ig-row">
+        <label for="vol-slider">Volume</label>
+        <input type="range" id="vol-slider" min="0" max="100" value="100">
+      </div>
+      <div class="ig-row">
+        <label for="bg-toggle">Nature break</label>
+        <div id="bg-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
+      </div>
+      <div class="ig-row">
+        <label for="bg-source">Source</label>
+        <div class="ig-select-wrap">
+          <select id="bg-source" class="select-field">
+            <option value="auto" selected>Automatic</option>
+            <option value="local">Local (Offline)</option>
+            <option value="mix">All (Landscapes)</option>
+            <option value="wikimedia">Wikimedia</option>
+            <option value="bing-nature">Bing Archive</option>
+          </select>
+          <span class="ig-select-chevron" aria-hidden="true">⌄</span>
+        </div>
+      </div>
     </div>
-      <div class="row">
-      <label for="tick-toggle">Watch tick</label>
-      <div id="tick-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
+
+    <div class="ig-footer-stats">
+      <span>Today · <strong id="pomodoro-count">0</strong></span>
+      <span>7 days · <strong id="weekly-focus-total">0m</strong></span>
     </div>
-      <div class="row">
-      <label for="vol-slider">Volume</label>
-      <input type="range" id="vol-slider" min="0" max="100" value="100">
-    </div>
-    </div>
-    <div class="popup-group">
-      <div class="popup-group-title">Ambience</div>
-      <div class="row">
-      <label for="bg-toggle">Nature break</label>
-      <div id="bg-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
-    </div>
-      <div class="row">
-      <label for="bg-source">Image source</label>
-                  <select id="bg-source" class="select-field">
-        <option value="auto" selected>Automatic</option>
-        <option value="local">Local (Offline)</option>
-        <option value="mix">All (Landscapes)</option>
-        <option value="wikimedia">Wikimedia (Landscapes)</option>
-        <option value="bing-nature">Bing Archive (Landscapes)</option>
-      </select>
-    </div>
-    </div>
-    <div class="row">
-      <label for="progress-toggle">Progress bar</label>
-      <div id="progress-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
-    </div>
-    <div class="row" style="margin-top: 12px; font-size: 13px; color: rgba(255,255,255,0.7);">
-      <span>Completed today</span>
-      <span id="pomodoro-count" style="font-weight: 600; color: #fff;">0</span>
-    </div>
-    <div class="row" style="margin-top: -4px; font-size: 13px; color: rgba(255,255,255,0.7);">
-      <span>Last 7 days</span>
-      <span id="weekly-focus-total" style="font-weight: 600; color: #fff;">0m</span>
-    </div>
+
     <div class="popup-actions">
       <button type="button" class="btn-hold-action" id="btn-skip">
         <span class="btn-hold-fill" id="btn-skip-fill"></span>
@@ -1154,7 +1327,6 @@
         <span class="btn-hold-label" id="btn-factory-reset-label">Reset all</span>
       </button>
     </div>
-    <button class="btn-reset-config" id="apply-config">Apply</button>
   </div>
 
   <div id="factory-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="factory-modal-title">
@@ -2821,8 +2993,9 @@
       const baseFs = startFs || endFs;
       DOM.el.style.fontSize = baseFs.toFixed(2) + "px";
 
-      const animMs = 750;
+      const animMs = 620;
       const startTime = performance.now();
+      let lastRasterWght = -999;
       function step(now) {
         const t = Math.min(1, (now - startTime) / animMs);
         const eased = EASE_IN_OUT(t);
@@ -2848,8 +3021,11 @@
         }
 
         const scale = baseFs > 0 ? (currentFs / baseFs) : 1;
-        DOM.el.style.transform = `translateY(${currentShift.toFixed(2)}px) scale(${scale.toFixed(4)})`;
-        applyVariation();
+        DOM.el.style.transform = `translate3d(0, ${currentShift.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
+        if (Math.abs(currentWght - lastRasterWght) >= 8) {
+          lastRasterWght = currentWght;
+          applyVariation();
+        }
         stateAnimRaf = requestAnimationFrame(step);
       }
       stateAnimRaf = requestAnimationFrame(step);
@@ -3281,8 +3457,14 @@
           return;
         }
       }
-      StorageManager.saveSessionState(false);
-      render();
+      const nextText = getDisplayTimeText();
+      if (nextText !== lastRenderedTimeText || lastRenderedTimerIndex !== AppState.idx) {
+        StorageManager.saveSessionState(false);
+        render();
+      } else if (AppState.isFocus() && (AppState.remaining <= 3.1 || (AppState.remaining <= 35 && AppState.remaining >= 34.5))) {
+        AudioEngine.updateBrownNoise();
+        BreakBackgroundManager.update();
+      }
     }
 
     let displayRaf = null;
@@ -3948,7 +4130,6 @@
       requestAnimationFrame(() => { innerRefit = false; });
     });
     ro.observe(document.documentElement);
-    ro.observe(DOM.el);
   }
   if (window.visualViewport) {
     window.visualViewport.addEventListener("resize", () => {
@@ -4058,6 +4239,13 @@
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
+    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    if (isLocal) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(r => r.unregister());
+      }).catch(() => {});
+      return;
+    }
     navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => reg.update()).catch(() => {});
   });
 }
