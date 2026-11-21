@@ -1,70 +1,61 @@
-cat <<'EOF' > /home/hugo/Documents/GitHub/Pomodoro-Ultimate/README.md
-# Pomodoro Ultimate
+<div align="center">
+  <img src="icons/icon.svg" alt="Pomodoro Ultimate" width="84" height="84" />
+  <h1>Pomodoro Ultimate</h1>
+  <p>Minimalist, offline-first Pomodoro timer with variable typography and procedural Web Audio.</p>
 
-A minimalist, fullscreen, offline-first Pomodoro timer built as a zero-dependency Progressive Web App (PWA). Designed around fluid variable typography, procedural Web Audio synthesis, and curated landscape breaks.
+  <p>
+    <a href="https://hugo-mrn10.github.io/Pomodoro-Ultimate/">
+      <img src="https://img.shields.io/badge/Launch_App-%E2%86%97-ffffff?style=for-the-badge" alt="Launch App" />
+    </a>
+  </p>
+  <p><a href="https://hugo-mrn10.github.io/Pomodoro-Ultimate/">hugo-mrn10.github.io/Pomodoro-Ultimate</a></p>
 
----
+  <p>
+    <img src="https://img.shields.io/badge/PWA-Offline--First-000000?style=flat-square" alt="PWA Offline" />
+    <img src="https://img.shields.io/badge/Dependencies-Zero-1c1c1e?style=flat-square" alt="Zero Dependencies" />
+    <img src="https://img.shields.io/badge/Audio-Web_Audio_API-1c1c1e?style=flat-square" alt="Web Audio API" />
+    <img src="https://img.shields.io/badge/License-PolyForm_Noncommercial_1.0-1c1c1e?style=flat-square" alt="License" />
+  </p>
+</div>
 
-## Screenshots
+<p align="center">
+  <img src="screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-26-14.png" alt="Focus mode" width="100%" />
+</p>
 
-| Focus Mode | Running State |
+| Nature Break | Settings & Controls |
 | :---: | :---: |
-| ![Focus Mode](screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-26-14.png) | ![Running State](screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-26-27.png) |
+| <img src="screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-27-56.png" alt="Nature Break" width="100%" /> | <img src="screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-26-48.png" alt="Settings" width="100%" /> |
+| **Active Focus** | **Session Intention & Cycle** |
+| <img src="screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-26-27.png" alt="Active Focus" width="100%" /> | <img src="screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-27-41.png" alt="Session Intention & Cycle" width="100%" /> |
 
-| Settings Panel | Session Intention & Cycle Dots |
-| :---: | :---: |
-| ![Settings Panel](screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-26-48.png) | ![Session Intention](screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-27-41.png) |
+<p align="center">
+  <img src="screenshots/Image%20coll%C3%A9e.png" alt="Controls & Credits" width="49%" />
+</p>
 
-| Nature Break | Controls & Shortcuts |
-| :---: | :---: |
-| ![Nature Break](screenshots/Capture%20d%E2%80%99%C3%A9cran%20du%202026-11-21%2018-27-56.png) | ![Controls and Shortcuts](screenshots/Image%20coll%C3%A9e.png) |
+### Highlights
 
----
-
-## Key Features
-
-- **Fluid Variable Typography (`Google Sans Flex`)**: Dynamically solves font width (`wdth`), weight (`wght`), optical size (`opsz`), and roundness (`ROND`) to fill the viewport at any aspect ratio, smoothly morphing between paused and active states.
-- **Procedural Web Audio Engine**: Zero external audio assets. Generates seamless looping brown noise (`600 Hz` low-pass filtered), mechanical watch-tick acoustics, and harmonic phase chimes directly via the Web Audio API.
-- **Curated Nature Breaks**: Displays high-resolution landscapes during breaks with adaptive luminance contrast and a blurred `background-clip: text` fill inside the timer digits. Supports **Automatic**, **Local (Offline)**, **Wikimedia Commons Featured Landscapes**, and **Bing Archive** sources.
-- **Intentional Gesture Protection**: Prevents accidental interruptions with progressive hold-to-confirm gauges (`3s` to pause, `1s` to resume, `5s` to skip or reset, `6s` for factory reset).
-- **Native System Integration**:
-  - Live pie-chart favicon adapting automatically to system light/dark themes.
-  - **Media Session API** support for OS lock-screen controls and hardware media keys.
-  - **Screen Wake Lock API** to keep the display awake during active sessions.
-  - Desktop notifications, session intention display, cycle progress dots, and rolling 7-day focus statistics stored locally.
-- **Offline-First PWA**: Installable on desktop and mobile with full offline caching via Service Worker (`sw.js`).
-
----
-
-## Controls & Shortcuts
-
-| Action | Gesture / Shortcut |
+| | |
 | :--- | :--- |
-| **Start session** | `Click` on timer or `Space` |
-| **Pause / Resume** | `Hold 3s` (pause) / `Hold 1s` (resume) via pointer or `Space` |
-| **Adjust volume** | Mouse `Scroll` wheel or settings slider |
-| **Mute / Unmute** | `M` |
-| **Toggle brown noise** | `N` |
-| **Open / Close settings** | Hover/tap top pill or `Esc` |
+| **Variable Typography**<br>Google Sans Flex animates weight, width, and roundness between focus and pause states. | **Procedural Web Audio**<br>Brown noise and mechanical watch tick synthesized in real time. Zero audio files. |
+| **Hold to Pause**<br>Hold 3s to pause (1s to resume) to prevent accidental interruptions. | **Hidden Controls**<br>All settings stay invisible until you hover or tap the top pill. |
+| **Curated Nature Breaks**<br>High-resolution landscapes from Wikimedia Commons, Bing Archive, or local offline storage with adaptive contrast. | **Focus Intention & Stats**<br>Optional session intention display, cycle progress dots, and rolling 7-day focus history. |
+| **Live Tab Favicon**<br>The browser tab icon updates in real time as a pie chart of remaining session time. | **Offline-First PWA**<br>Service Worker caching, Media Session controls, and Screen Wake Lock. Works completely offline. |
 
----
+### Controls
 
-## Default Cycle
+| Action | Pointer / Touch | Keyboard |
+| :--- | :--- | :--- |
+| **Start** | Click timer | `Space` |
+| **Pause / Resume** | Hold `3s` / `1s` | Hold `Space` (`3s` / `1s`) |
+| **Volume** | Scroll wheel | Settings slider |
+| **Mute** | Settings slider | `M` |
+| **Brown noise** | Settings switch | `N` |
+| **Settings** | Hover or tap top pill | `Esc` |
 
-1. **Focus** — `25 min`
-2. **Short Break** — `5 min`
-3. **Focus** — `25 min`
-4. **Short Break** — `5 min`
-5. **Focus** — `25 min`
-6. **Long Break** — `15 min`
-
-All durations are customizable from the top settings drawer (`1` to `480` minutes).
-
----
-
-## Running Locally
-
-Because Service Workers and ES/Web Workers require an HTTP context, serve the repository with any static server:
+### Run locally
 
 ```bash
+git clone [https://github.com/hugo-mrn10/Pomodoro-Ultimate.git](https://github.com/hugo-mrn10/Pomodoro-Ultimate.git)
+cd Pomodoro-Ultimate
 python3 -m http.server 8080
+```
