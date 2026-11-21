@@ -1,0 +1,3479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pomodoro Ultimate">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Pomodoro Ultimate</title>
+<link rel="preload" href="fonts/font-02.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/font-11.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face {
+  font-family: 'Google Sans Flex';
+  font-style: normal;
+  font-weight: 100 1000;
+  font-stretch: 25% 151%;
+  font-display: swap;
+  src: url(fonts/font-02.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/font-11.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(fonts/font-11.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(fonts/font-11.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/font-11.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+</style>
+<style>
+  :root {
+    --ease-apple: cubic-bezier(0.22, 1, 0.36, 1);
+    --surface-material: rgba(28, 28, 30, 0.84);
+    --hairline-border: rgba(255, 255, 255, 0.16);
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: #000;
+    overflow: hidden;
+    color: #fff;
+  }
+
+  /* ---------- Arrière-plan normal (fondu d'opacité pur) ---------- */
+  #bg-layer {
+    position: fixed;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 0.8s var(--ease-apple);
+    z-index: 0;
+    pointer-events: none;
+  }
+  #bg-layer.active {
+    opacity: 1;
+  }
+
+  /* ---------- Voile de contraste adaptatif pendant la pause ---------- */
+  #bg-veil {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    opacity: 0;
+    transition: opacity 0.8s var(--ease-apple);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  /* ---------- Timer unifié (Google Sans Flex + remplissage photo continu) ---------- */
+  #time {
+    display: inline-block;
+    contain: layout style;
+    white-space: nowrap;
+    line-height: 1;
+    font-family: "Google Sans Flex", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-weight: 100;
+    font-variation-settings: "wght" 100, "wdth" 100, "opsz" 144, "ROND" 100;
+    color: rgba(255, 255, 255, 1);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+    letter-spacing: -0.03em;
+    transform: none;
+    opacity: 0;
+    position: relative;
+    z-index: 2;
+    background-repeat: no-repeat;
+    background-position: center center;
+    transition:
+      opacity 0.8s var(--ease-apple),
+      color 0.8s var(--ease-apple);
+  }
+  body.ready #time { opacity: 0.75; }
+  body.ready.running #time { opacity: 1; }
+
+  #time.break-image-ready {
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  #time.break-image-ready.break-image-revealed {
+    color: rgba(255, 255, 255, 0);
+  }
+
+  /* ---------- Légende discrète du lieu (bas gauche, visible avec le popup) ---------- */
+  #bg-caption {
+    position: fixed;
+    bottom: 8px;
+    left: 12px;
+    max-width: min(420px, calc(100vw - 24px));
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    line-height: 1.3;
+    color: rgba(255, 255, 255, 0.82);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95), 0 0 24px rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0;
+    transition: opacity 0.25s var(--ease-apple);
+    pointer-events: none;
+    z-index: 6;
+  }
+  #bg-caption.visible {
+    opacity: 1;
+  }
+
+  /* ---------- Intention de session ultra-discrète (visible avec le popup) ---------- */
+  #session-intent-display {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: min(460px, calc(100vw - 32px));
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: rgba(255, 255, 255, 0.88);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95), 0 0 24px rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0;
+    transition: opacity 0.25s var(--ease-apple);
+    pointer-events: none;
+    z-index: 6;
+  }
+  #session-intent-display.visible {
+    opacity: 1;
+  }
+
+  .intent-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.11);
+    border: 1px solid transparent;
+    border-radius: 14px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    padding: 8px 12px;
+    outline: none;
+    transition: background 0.18s ease, border-color 0.18s ease;
+  }
+  .intent-input::placeholder {
+    color: rgba(255, 255, 255, 0.42);
+  }
+  .intent-input:focus {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.24);
+  }
+
+  /* ---------- Repère visuel du cycle (hors popup, visible avec le popup) ---------- */
+  #cycle-indicator {
+    position: fixed;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.25s var(--ease-apple);
+    pointer-events: none;
+    z-index: 6;
+    filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.75));
+  }
+  #cycle-indicator.visible {
+    opacity: 1;
+  }
+  .cycle-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.42);
+    transition: background 0.25s ease, transform 0.25s var(--ease-apple);
+  }
+  .cycle-dot.done {
+    background: rgba(255, 255, 255, 0.95);
+    transform: scale(1.12);
+  }
+
+  /* ---------- Pilule supérieure & Popup style Apple (Vibrancy) ---------- */
+  #hot-zone {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(260px, 70vw);
+    height: 44px;
+    z-index: 10;
+    cursor: pointer;
+  }
+
+  #top-pill {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    width: 44px;
+    height: 4px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.28);
+    transform: translateX(-50%) translateY(-24px);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      transform 0.42s var(--ease-apple),
+      opacity 0.28s ease,
+      width 0.28s var(--ease-apple),
+      background 0.22s ease;
+    z-index: 11;
+  }
+  #top-pill.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  #top-pill.hovered {
+    width: 56px;
+    background: rgba(255, 255, 255, 0.5);
+  }
+  #top-pill.hidden-by-popup {
+    transform: translateX(-50%) translateY(-12px) scale(0.7);
+    opacity: 0;
+    transition: transform 0.2s ease, opacity 0.16s ease;
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    #top-pill:not(.hidden-by-popup) {
+      transform: translateX(-50%) translateY(0);
+      opacity: 0.85;
+    }
+  }
+
+  #popup {
+    position: fixed;
+    top: 14px;
+    left: 50%;
+    transform-origin: top center;
+    transform: translateX(-50%) translateY(-18px) scale(0.9);
+    width: min(316px, 92vw);
+    max-height: calc(100vh - 28px);
+    max-height: calc(100dvh - 28px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    background: var(--surface-material);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border-radius: 32px;
+    border: 1px solid var(--hairline-border);
+    box-shadow: 0 24px 54px rgba(0, 0, 0, 0.68), inset 0 0.5px 0 rgba(255, 255, 255, 0.22);
+    padding: 16px 18px;
+    box-sizing: border-box;
+    color: #fff;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    opacity: 0;
+    filter: blur(6px);
+    pointer-events: none;
+    transition:
+      transform 0.44s cubic-bezier(0.22, 1.2, 0.36, 1),
+      opacity 0.26s ease,
+      filter 0.32s ease;
+    z-index: 20;
+  }
+  #popup::-webkit-scrollbar {
+    display: none;
+  }
+
+  #popup.visible {
+    opacity: 1;
+    filter: blur(0px);
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+
+  .popup-title {
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.92);
+    margin-bottom: 10px;
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    gap: 12px;
+  }
+  .row:last-child { margin-bottom: 0; }
+
+  .row label {
+    font-weight: 500;
+    color: #fff;
+    flex: 1;
+    white-space: nowrap;
+  }
+
+  /* Toggle switch style iOS */
+  .switch {
+    position: relative;
+    width: 44px;
+    height: 26px;
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 13px;
+    cursor: pointer;
+    transition: background 0.22s var(--ease-apple), transform 0.14s ease;
+    flex-shrink: 0;
+    outline: none;
+  }
+  .switch:focus-visible {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.65);
+  }
+  .switch:active {
+    transform: scale(0.95);
+  }
+  .switch.active {
+    background: #ffffff;
+  }
+  .switch::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.32);
+    transition: transform 0.24s var(--ease-apple), background 0.2s ease;
+  }
+  .switch.active::after {
+    transform: translateX(18px);
+    background: #1c1c1e;
+  }
+
+  /* Sélecteur de source */
+  .select-field {
+    background: rgba(255, 255, 255, 0.12);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    padding: 6px 10px;
+    outline: none;
+    cursor: pointer;
+    max-width: 175px;
+    transition: background 0.15s ease;
+  }
+  .select-field:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
+  .select-field option {
+    background: #1c1c1e;
+    color: #fff;
+  }
+
+  /* Champs de temps */
+  .time-inputs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+  .time-field {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.11);
+    border-radius: 14px;
+    padding: 6px 9px;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .time-field span {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+  }
+  .time-field input {
+    flex: 1 1 0;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    text-align: right;
+    outline: none;
+    padding: 2px 0;
+  }
+  .time-field input::-webkit-outer-spin-button,
+  .time-field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .time-field input[type=number] { -moz-appearance: textfield; }
+
+  .popup-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .btn-hold-action {
+    position: relative;
+    overflow: hidden;
+    flex: 1 1 0;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.11);
+    border: none;
+    border-radius: 16px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.14s ease;
+  }
+  .btn-hold-action:hover {
+    background: rgba(255, 255, 255, 0.16);
+  }
+  .btn-hold-action:active {
+    transform: scale(0.97);
+  }
+  .btn-hold-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0%;
+    background: rgba(255, 255, 255, 0.24);
+    pointer-events: none;
+  }
+  .btn-hold-label {
+    position: relative;
+    z-index: 1;
+  }
+
+  .btn-reset-config {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.16);
+    border: none;
+    border-radius: 18px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.14s ease;
+  }
+  .btn-reset-config:hover {
+    background: rgba(255, 255, 255, 0.22);
+  }
+  .btn-reset-config:active {
+    background: rgba(255, 255, 255, 0.28);
+    transform: scale(0.98);
+  }
+
+  .btn-hold-action.btn-danger-hold {
+    background: rgba(255, 69, 58, 0.18);
+    border: none;
+    outline: none;
+    color: #ff6961;
+    padding: 10px 8px;
+    white-space: nowrap;
+  }
+  .btn-hold-action.btn-danger-hold .btn-hold-fill {
+    background: rgba(255, 69, 58, 0.36);
+  }
+
+  /* ---------- Pop-up d'avertissement réinitialisation totale ---------- */
+  #factory-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s var(--ease-apple);
+    z-index: 40;
+  }
+  #factory-modal-backdrop.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #factory-modal {
+    width: min(300px, 90vw);
+    background: var(--surface-material);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--hairline-border);
+    border-radius: 26px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.72), inset 0 0.5px 0 rgba(255, 255, 255, 0.2);
+    padding: 18px;
+    box-sizing: border-box;
+    text-align: center;
+    transform: scale(0.92);
+    transition: transform 0.26s cubic-bezier(0.22, 1.24, 0.36, 1);
+  }
+  #factory-modal-backdrop.visible #factory-modal {
+    transform: scale(1);
+  }
+  #factory-modal-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+  #factory-modal-desc {
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.74);
+    margin-bottom: 16px;
+  }
+  .factory-modal-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .factory-modal-actions button {
+    flex: 1 1 0;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.14s ease;
+  }
+  .factory-modal-actions button:active {
+    transform: scale(0.97);
+  }
+  #factory-cancel-btn {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+  }
+  #factory-confirm-btn {
+    background: #ff453a;
+    color: #fff;
+  }
+
+  /* ---------- Jauge minimaliste Hold to pause / resume ---------- */
+  #hold-prompt {
+    position: fixed;
+    bottom: 44px;
+    left: 50%;
+    transform: translateX(-50%) translateY(6px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s var(--ease-apple), transform 0.2s var(--ease-apple);
+    z-index: 25;
+  }
+  #hold-prompt.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  #hold-prompt-text {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: rgba(255, 255, 255, 0.88);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.72);
+  }
+  #hold-prompt-track {
+    width: 112px;
+    height: 3px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.24);
+    overflow: hidden;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+  }
+  #hold-prompt-fill {
+    width: 0%;
+    height: 100%;
+    background: #ffffff;
+    border-radius: 99px;
+  }
+
+  /* ---------- Progress bar ---------- */
+  #progress-bar {
+    position: fixed; bottom: 0; left: 0;
+    height: 3px; width: 0%;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.45);
+    z-index: 5;
+    transition: width 100ms linear, opacity 0.3s ease;
+    pointer-events: none;
+    opacity: 1;
+  }
+  #progress-bar.hidden {
+    opacity: 0;
+  }
+
+  /* ---------- Barre de volume minimaliste (côté droit) ---------- */
+  #volume-bar {
+    position: fixed;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%) translateX(6px);
+    width: 4px;
+    height: 130px;
+    background: rgba(255, 255, 255, 0.24);
+    border-radius: 99px;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 220ms var(--ease-apple), transform 220ms var(--ease-apple);
+    z-index: 30;
+    pointer-events: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  }
+  #volume-bar.visible {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+  #volume-bar-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    border-radius: 99px;
+    transition: none;
+  }
+  #volume-bar-fill.snapping {
+    transition: height 280ms var(--ease-apple);
+  }
+
+  /* ---------- Indicateur volume / notifications ---------- */
+  #volume-indicator {
+    position: fixed; bottom: 36px; left: 50%;
+    transform: translateX(-50%) translateY(6px);
+    padding: 8px 18px;
+    background: var(--surface-material);
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    border: 1px solid var(--hairline-border);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.48);
+    border-radius: 20px;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 13px; font-weight: 600; color: #fff;
+    opacity: 0;
+    transition: opacity 200ms var(--ease-apple), transform 200ms var(--ease-apple);
+    z-index: 30; pointer-events: none;
+  }
+  #volume-indicator.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ---------- Slider volume ---------- */
+  #vol-slider {
+    -webkit-appearance: none; appearance: none;
+    width: 120px; height: 4px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 2px; outline: none;
+    flex-shrink: 0; cursor: pointer;
+  }
+  #vol-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 18px; height: 18px;
+    background: #fff; border-radius: 50%; cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  }
+  #vol-slider::-moz-range-thumb {
+    width: 18px; height: 18px;
+    background: #fff; border: none; border-radius: 50%; cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  }
+
+  /* ---------- Accessibilité : réduction des animations ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+
+  /* ---------- En-tête Settings + bouton Info & Modale Crédits ---------- */
+  .popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .popup-header .popup-title {
+    margin-bottom: 0;
+  }
+  .btn-info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.78);
+    cursor: pointer;
+    transition: background 0.16s ease, color 0.16s ease, transform 0.14s ease;
+  }
+  .btn-info-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+  }
+  .btn-info-icon:active {
+    transform: scale(0.92);
+  }
+
+  #info-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 45;
+  }
+  #info-modal-backdrop.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #info-modal {
+    width: min(320px, 92vw);
+    background: rgba(28, 28, 30, 0.88);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 26px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.74), inset 0 0.5px 0 rgba(255, 255, 255, 0.2);
+    padding: 18px 20px;
+    box-sizing: border-box;
+    color: #fff;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    transform: scale(0.92);
+    transition: transform 0.26s cubic-bezier(0.22, 1.24, 0.36, 1);
+  }
+  #info-modal-backdrop.visible #info-modal {
+    transform: scale(1);
+  }
+  .info-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  #info-modal-title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #fff;
+  }
+  .info-close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .info-close-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+    color: #fff;
+  }
+  .info-section-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.55);
+    margin-bottom: 8px;
+  }
+  .info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 14px;
+  }
+  .info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 12.5px;
+    color: rgba(255, 255, 255, 0.88);
+  }
+  .info-kbd {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.92);
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 2px 7px;
+    white-space: nowrap;
+  }
+  .info-credits {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding-top: 12px;
+    text-align: center;
+  }
+  .info-author {
+    font-size: 12.5px;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  .info-sub {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.52);
+    margin-top: 3px;
+  }
+</style>
+</head>
+<body>
+  <!-- Arrière-plan normal & voile de contraste -->
+  <div id="bg-layer"></div>
+  <div id="bg-veil"></div>
+
+  <!-- Légende discrète du lieu -->
+  <div id="bg-caption" aria-hidden="true"></div>
+  <div id="session-intent-display" aria-hidden="true"></div>
+
+  <!-- Repère visuel du cycle -->
+  <div id="cycle-indicator" aria-hidden="true">
+    <span class="cycle-dot"></span>
+    <span class="cycle-dot"></span>
+    <span class="cycle-dot"></span>
+  </div>
+
+  <div id="hot-zone"></div>
+  <div id="top-pill" aria-hidden="true"></div>
+
+  <div id="popup">
+    <div class="popup-header">
+      <div class="popup-title">Settings</div>
+      <button type="button" id="btn-info" class="btn-info-icon" aria-label="Controls &amp; Credits" title="Controls &amp; Credits">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="row">
+      <label for="noise-toggle">Brown noise</label>
+      <div id="noise-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
+    </div>
+
+    <div class="row">
+      <label for="tick-toggle">Watch tick</label>
+      <div id="tick-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
+    </div>
+
+    <div class="row">
+      <label for="progress-toggle">Progress bar</label>
+      <div id="progress-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
+    </div>
+
+    <div class="row">
+      <label for="bg-toggle">Nature break</label>
+      <div id="bg-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
+    </div>
+
+    <div class="row">
+      <label for="autostart-toggle">Auto-start</label>
+      <div id="autostart-toggle" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
+    </div>
+
+    <div class="row">
+      <label for="notif-toggle">Notifications</label>
+      <div id="notif-toggle" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
+    </div>
+
+    <div class="row">
+      <label for="bg-source">Image source</label>
+                  <select id="bg-source" class="select-field">
+        <option value="auto" selected>Automatic</option>
+        <option value="local">Local (Offline)</option>
+        <option value="mix">All (Landscapes)</option>
+        <option value="wikimedia">Wikimedia (Landscapes)</option>
+        <option value="bing-nature">Bing Archive (Landscapes)</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label for="vol-slider">Volume</label>
+      <input type="range" id="vol-slider" min="0" max="100" value="100">
+    </div>
+
+    <div class="row" style="flex-direction:column; align-items:stretch; gap:6px;">
+      <label for="session-intent-input" style="font-size:12px;">Session intention</label>
+      <input type="text" id="session-intent-input" class="intent-input" maxlength="80" placeholder="Optional focus intention…">
+    </div>
+
+    <div class="row" style="flex-direction:column; align-items:stretch; gap:8px;">
+      <label style="font-size:12px;">Duration (minutes)</label>
+      <div class="time-inputs">
+        <div class="time-field">
+          <span>Focus</span>
+          <input type="number" id="focus-dur" value="25" min="1" max="480">
+        </div>
+        <div class="time-field">
+          <span>Break</span>
+          <input type="number" id="break-dur" value="5" min="1" max="60">
+        </div>
+        <div class="time-field">
+          <span>Long</span>
+          <input type="number" id="long-break-dur" value="15" min="1" max="120">
+        </div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top: 12px; font-size: 13px; color: rgba(255,255,255,0.7);">
+      <span>Completed today</span>
+      <span id="pomodoro-count" style="font-weight: 600; color: #fff;">0</span>
+    </div>
+
+    <div class="row" style="margin-top: -4px; font-size: 13px; color: rgba(255,255,255,0.7);">
+      <span>Last 7 days</span>
+      <span id="weekly-focus-total" style="font-weight: 600; color: #fff;">0m</span>
+    </div>
+
+    <div class="popup-actions">
+      <button type="button" class="btn-hold-action" id="btn-skip">
+        <span class="btn-hold-fill" id="btn-skip-fill"></span>
+        <span class="btn-hold-label" id="btn-skip-label">Skip</span>
+      </button>
+      <button type="button" class="btn-hold-action" id="btn-reset">
+        <span class="btn-hold-fill" id="btn-reset-fill"></span>
+        <span class="btn-hold-label" id="btn-reset-label">Reset</span>
+      </button>
+      <button type="button" class="btn-hold-action btn-danger-hold" id="btn-factory-reset">
+        <span class="btn-hold-fill" id="btn-factory-reset-fill"></span>
+        <span class="btn-hold-label" id="btn-factory-reset-label">Reset all</span>
+      </button>
+    </div>
+
+    <button class="btn-reset-config" id="apply-config">Apply</button>
+  </div>
+
+  <div id="factory-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="factory-modal-title">
+    <div id="factory-modal">
+      <div id="factory-modal-title">Reset everything?</div>
+      <div id="factory-modal-desc">This will erase all saved settings, session history, statistics, and cached backgrounds.</div>
+      <div class="factory-modal-actions">
+        <button type="button" id="factory-cancel-btn">Cancel</button>
+        <button type="button" id="factory-confirm-btn">Reset all</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="info-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="info-modal-title">
+    <div id="info-modal">
+      <div class="info-modal-header">
+        <div id="info-modal-title">Pomodoro Ultimate</div>
+        <button type="button" id="info-close-btn" class="info-close-btn" aria-label="Close">✕</button>
+      </div>
+      <div class="info-section-label">Controls &amp; Shortcuts</div>
+      <div class="info-list">
+        <div class="info-row"><span>Start session</span><span class="info-kbd">Click / Space</span></div>
+        <div class="info-row"><span>Pause / Resume</span><span class="info-kbd">Hold 3s / 1s</span></div>
+        <div class="info-row"><span>Volume / Mute</span><span class="info-kbd">Scroll / M</span></div>
+        <div class="info-row"><span>Brown noise</span><span class="info-kbd">N</span></div>
+        <div class="info-row"><span>Settings</span><span class="info-kbd">Top pill / Esc</span></div>
+      </div>
+      <div class="info-credits">
+        <div class="info-author">Created by <strong>Hugo Maurin</strong></div>
+        <div class="info-sub">Open-source &amp; non-commercial · Offline-first PWA</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chiffres blancs de base -->
+  <span id="time">25:00</span>
+
+  <div id="progress-bar"></div>
+  <div id="hold-prompt" aria-hidden="true">
+    <span id="hold-prompt-text">Hold to pause</span>
+    <div id="hold-prompt-track"><div id="hold-prompt-fill"></div></div>
+  </div>
+  <div id="volume-bar" aria-hidden="true"><div id="volume-bar-fill"></div></div>
+  <div id="volume-indicator"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  /* =========================================================================
+   * 1. CONFIGURATION & ÉTAT CENTRALISÉ
+   * ========================================================================= */
+  const DEFAULT_SEQUENCE = [25, 5, 25, 5, 25, 15];
+  const MIN_BG_WIDTH  = 1920;
+  const MIN_BG_HEIGHT = 1080;
+  const REMOTE_BG_CACHE = "pomodoro-remote-bg-v1";
+
+  const DEFAULT_PREFS = Object.freeze({
+    focus: 25,
+    break: 5,
+    longBreak: 15,
+    noise: true,
+    progressBar: true,
+    watchTick: true,
+    notifications: false,
+    autoStart: false,
+    natureBg: true,
+    bgSource: "auto",
+    volume: 1.0,
+    completedToday: 0,
+    lastDate: new Date().toDateString(),
+    dailyHistory: {},
+    sessionIntent: ""
+  });
+
+  const DOM = {
+    el: document.getElementById("time"),
+    bgLayer: document.getElementById("bg-layer"),
+    bgVeil: document.getElementById("bg-veil"),
+    bgCaptionEl: document.getElementById("bg-caption"),
+    cycleIndicatorEl: document.getElementById("cycle-indicator"),
+    popup: document.getElementById("popup"),
+    hotZone: document.getElementById("hot-zone"),
+    topPill: document.getElementById("top-pill"),
+    noiseToggle: document.getElementById("noise-toggle"),
+    progressToggle: document.getElementById("progress-toggle"),
+    tickToggle: document.getElementById("tick-toggle"),
+    notifToggle: document.getElementById("notif-toggle"),
+    autoStartToggle: document.getElementById("autostart-toggle"),
+    bgToggle: document.getElementById("bg-toggle"),
+    bgSourceSelect: document.getElementById("bg-source"),
+    focusInput: document.getElementById("focus-dur"),
+    breakInput: document.getElementById("break-dur"),
+    longBreakInput: document.getElementById("long-break-dur"),
+    applyBtn: document.getElementById("apply-config"),
+    btnSkip: document.getElementById("btn-skip"),
+    btnSkipFill: document.getElementById("btn-skip-fill"),
+    btnSkipLabel: document.getElementById("btn-skip-label"),
+    btnReset: document.getElementById("btn-reset"),
+    btnResetFill: document.getElementById("btn-reset-fill"),
+    btnResetLabel: document.getElementById("btn-reset-label"),
+    btnFactoryReset: document.getElementById("btn-factory-reset"),
+    btnFactoryResetFill: document.getElementById("btn-factory-reset-fill"),
+    btnFactoryResetLabel: document.getElementById("btn-factory-reset-label"),
+    factoryModalBackdrop: document.getElementById("factory-modal-backdrop"),
+    factoryCancelBtn: document.getElementById("factory-cancel-btn"),
+    factoryConfirmBtn: document.getElementById("factory-confirm-btn"),
+    holdPrompt: document.getElementById("hold-prompt"),
+    holdPromptText: document.getElementById("hold-prompt-text"),
+    holdPromptFill: document.getElementById("hold-prompt-fill"),
+    progressBar: document.getElementById("progress-bar"),
+    volumeIndicator: document.getElementById("volume-indicator"),
+    volumeBar: document.getElementById("volume-bar"),
+    volumeBarFill: document.getElementById("volume-bar-fill"),
+    volSlider: document.getElementById("vol-slider"),
+    pomodoroCountEl: document.getElementById("pomodoro-count"),
+    weeklyFocusTotalEl: document.getElementById("weekly-focus-total"),
+    sessionIntentDisplayEl: document.getElementById("session-intent-display"),
+    sessionIntentInput: document.getElementById("session-intent-input")
+  };
+
+  const AppState = {
+    sequence: DEFAULT_SEQUENCE.map(m => m * 60),
+    idx: 0,
+    remaining: DEFAULT_SEQUENCE[0] * 60,
+    running: false,
+    stageStarted: false,
+    endAt: 0,
+    completedToday: 0,
+    lastSavedDate: new Date().toDateString(),
+    dailyHistory: {},
+    seenBgUrls: [],
+
+    isBreak() {
+      return (this.idx % 2) === 1;
+    },
+    isFocus() {
+      return (this.idx % 2) === 0;
+    }
+  };
+
+  const prefersReducedMotion = () =>
+    Boolean(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+  function fmt(sec) {
+    const t = Math.max(0, Math.ceil(sec));
+    return String(Math.floor(t / 60)).padStart(2, "0") + ":" +
+           String(t % 60).padStart(2, "0");
+  }
+
+  function setSwitchState(elSwitch, active) {
+    if (!elSwitch) return;
+    const on = Boolean(active);
+    elSwitch.classList.toggle("active", on);
+    elSwitch.setAttribute("aria-checked", on ? "true" : "false");
+  }
+
+  function isSwitchActive(elSwitch) {
+    return Boolean(elSwitch && elSwitch.classList.contains("active"));
+  }
+
+  /* =========================================================================
+   * 2. HISTORIQUE & PERSISTANCE (StorageManager)
+   * ========================================================================= */
+  const StorageManager = (() => {
+    let lastSessionSaveAt = 0;
+    let prefsSaveTimer = null;
+
+    function getDateKey(date = new Date()) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function pruneDailyHistory() {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 30);
+      const cutoffKey = getDateKey(cutoff);
+      for (const key of Object.keys(AppState.dailyHistory)) {
+        if (key < cutoffKey) delete AppState.dailyHistory[key];
+      }
+    }
+
+    function recordCompletedFocus(durationSec) {
+      const key = getDateKey();
+      if (!AppState.dailyHistory[key] || typeof AppState.dailyHistory[key] !== "object") {
+        AppState.dailyHistory[key] = { count: 0, focusSec: 0 };
+      }
+      AppState.dailyHistory[key].count = (AppState.dailyHistory[key].count || 0) + 1;
+      AppState.dailyHistory[key].focusSec = (AppState.dailyHistory[key].focusSec || 0) + Math.max(0, Math.round(durationSec));
+      pruneDailyHistory();
+    }
+
+    function getWeeklyFocusSummary() {
+      let totalSec = 0;
+      let totalCount = 0;
+      for (let i = 0; i < 7; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const entry = AppState.dailyHistory[getDateKey(d)];
+        if (entry) {
+          totalSec += entry.focusSec || 0;
+          totalCount += entry.count || 0;
+        }
+      }
+      const totalMins = Math.round(totalSec / 60);
+      const hrs = Math.floor(totalMins / 60);
+      const mins = totalMins % 60;
+      const timeStr = hrs > 0 ? `${hrs}h ${String(mins).padStart(2, "0")}m` : `${mins}m`;
+      return totalCount > 0 ? `${timeStr} (${totalCount})` : "0m";
+    }
+
+    function savePrefs() {
+      try {
+        localStorage.setItem("pomodoro-prefs", JSON.stringify({
+          focus:          parseInt(DOM.focusInput.value, 10) || DEFAULT_PREFS.focus,
+          break:          parseInt(DOM.breakInput.value, 10) || DEFAULT_PREFS.break,
+          longBreak:      parseInt(DOM.longBreakInput.value, 10) || DEFAULT_PREFS.longBreak,
+          noise:          isSwitchActive(DOM.noiseToggle),
+          progressBar:    isSwitchActive(DOM.progressToggle),
+          watchTick:      isSwitchActive(DOM.tickToggle),
+          notifications:  isSwitchActive(DOM.notifToggle),
+          autoStart:      isSwitchActive(DOM.autoStartToggle),
+          natureBg:       isSwitchActive(DOM.bgToggle),
+          bgSource:       DOM.bgSourceSelect.value,
+          volume:         AudioEngine.getVolume(),
+          sequence:       AppState.sequence,
+          completedToday: AppState.completedToday,
+          lastDate:       AppState.lastSavedDate,
+          dailyHistory:   AppState.dailyHistory,
+          sessionIntent:  DOM.sessionIntentInput ? DOM.sessionIntentInput.value.trim() : ""
+        }));
+      } catch (e) {}
+    }
+
+    function scheduleSavePrefs() {
+      clearTimeout(prefsSaveTimer);
+      prefsSaveTimer = setTimeout(savePrefs, 300);
+    }
+
+    function saveSessionState(force = false) {
+      const now = performance.now();
+      if (!force && now - lastSessionSaveAt < 1000) return;
+      lastSessionSaveAt = now;
+      const liveRemaining = AppState.running
+        ? Math.max(0, (AppState.endAt - now) / 1000)
+        : AppState.remaining;
+      const payload = JSON.stringify({
+        idx: AppState.idx,
+        remaining: Math.max(0, Number(liveRemaining.toFixed(2))),
+        running: AppState.running,
+        stageStarted: AppState.stageStarted,
+        savedAt: Date.now()
+      });
+      try {
+        localStorage.setItem("pomodoro-session", payload);
+      } catch (e) {}
+      try {
+        window.name = "POMODORO_SESSION:" + payload;
+      } catch (e) {}
+    }
+
+    function markBgSeen(url) {
+      if (!url) return;
+      if (!AppState.seenBgUrls.includes(url)) {
+        AppState.seenBgUrls.push(url);
+        if (AppState.seenBgUrls.length > 800) AppState.seenBgUrls.shift();
+        try {
+          localStorage.setItem("pomodoro-seen-bgs", JSON.stringify(AppState.seenBgUrls));
+        } catch (e) {}
+      }
+    }
+
+    function applyPrefsToUI(prefs) {
+      DOM.focusInput.value     = String(prefs.focus);
+      DOM.breakInput.value     = String(prefs.break);
+      DOM.longBreakInput.value = String(prefs.longBreak);
+
+      setSwitchState(DOM.noiseToggle,     prefs.noise);
+      setSwitchState(DOM.progressToggle,  prefs.progressBar);
+      setSwitchState(DOM.tickToggle,      prefs.watchTick);
+      setSwitchState(DOM.notifToggle,     prefs.notifications);
+      setSwitchState(DOM.autoStartToggle, prefs.autoStart);
+      setSwitchState(DOM.bgToggle,        prefs.natureBg);
+
+      if (DOM.bgSourceSelect && Array.from(DOM.bgSourceSelect.options).some(o => o.value === prefs.bgSource)) {
+        DOM.bgSourceSelect.value = prefs.bgSource;
+      } else if (DOM.bgSourceSelect) {
+        DOM.bgSourceSelect.value = DEFAULT_PREFS.bgSource;
+      }
+
+      if (DOM.sessionIntentInput) {
+        DOM.sessionIntentInput.value = typeof prefs.sessionIntent === "string" ? prefs.sessionIntent : "";
+      }
+
+      AudioEngine.setVolumeSilent(typeof prefs.volume === "number" ? prefs.volume : DEFAULT_PREFS.volume);
+    }
+
+    function loadAll() {
+      try {
+        const storedSeen = JSON.parse(localStorage.getItem("pomodoro-seen-bgs") || "[]");
+        if (Array.isArray(storedSeen)) AppState.seenBgUrls = storedSeen;
+      } catch (e) {}
+
+      let merged = { ...DEFAULT_PREFS };
+      try {
+        const saved = JSON.parse(localStorage.getItem("pomodoro-prefs") || "null");
+        if (saved && typeof saved === "object") {
+          merged = { ...DEFAULT_PREFS, ...saved };
+          if (Array.isArray(saved.sequence) && saved.sequence.length === 6) {
+            AppState.sequence  = saved.sequence;
+            AppState.remaining = AppState.sequence[0];
+          }
+          if (saved.dailyHistory && typeof saved.dailyHistory === "object") {
+            AppState.dailyHistory = saved.dailyHistory;
+            pruneDailyHistory();
+          }
+          const today = new Date().toDateString();
+          AppState.lastSavedDate = today;
+          if (saved.lastDate === today && typeof saved.completedToday === "number") {
+            AppState.completedToday = saved.completedToday;
+            const todayKey = getDateKey();
+            if (!AppState.dailyHistory[todayKey] && AppState.completedToday > 0) {
+              AppState.dailyHistory[todayKey] = {
+                count: AppState.completedToday,
+                focusSec: AppState.completedToday * (AppState.sequence[0] || 1500)
+              };
+            }
+          }
+        }
+      } catch (e) {}
+
+      applyPrefsToUI(merged);
+
+      let session = null;
+      try {
+        session = JSON.parse(localStorage.getItem("pomodoro-session") || "null");
+      } catch (e) {}
+      if (!session && typeof window.name === "string" && window.name.startsWith("POMODORO_SESSION:")) {
+        try {
+          session = JSON.parse(window.name.slice("POMODORO_SESSION:".length));
+        } catch (e) {}
+      }
+
+      if (session && typeof session.idx === "number" && typeof session.remaining === "number") {
+        if (session.idx >= 0 && session.idx < AppState.sequence.length && session.remaining > 0) {
+          const wasRunning = session.running === true;
+          const elapsedSec = (wasRunning && typeof session.savedAt === "number")
+            ? Math.max(0, (Date.now() - session.savedAt) / 1000)
+            : 0;
+          const left = session.remaining - elapsedSec;
+
+          if (left > 0) {
+            AppState.idx = session.idx;
+            AppState.remaining = left;
+            AppState.running = wasRunning;
+            AppState.stageStarted = wasRunning || (session.stageStarted === true) || (left < AppState.sequence[session.idx]);
+            if (wasRunning) {
+              AppState.endAt = performance.now() + left * 1000;
+            }
+          } else {
+            AppState.idx = (session.idx + 1) % AppState.sequence.length;
+            AppState.remaining = AppState.sequence[AppState.idx];
+            AppState.running = false;
+            AppState.stageStarted = false;
+          }
+        }
+      }
+    }
+
+    return {
+      recordCompletedFocus,
+      getWeeklyFocusSummary,
+      savePrefs,
+      scheduleSavePrefs,
+      saveSessionState,
+      markBgSeen,
+      applyPrefsToUI,
+      loadAll
+    };
+  })();
+
+  window.addEventListener("pagehide", () => StorageManager.saveSessionState(true));
+  window.addEventListener("beforeunload", () => StorageManager.saveSessionState(true));
+
+  /* =========================================================================
+   * 3. MOTEUR AUDIO (AudioEngine)
+   * ========================================================================= */
+  const AudioEngine = (() => {
+    const TRANSITION_S = 0.6;
+    const NOISE_VOL = 0.85;
+
+    let actx = null;
+    let masterGain = null;
+    let currentVolume = DEFAULT_PREFS.volume;
+    let lastNonZeroVolume = DEFAULT_PREFS.volume;
+
+    let watchTickNoiseBuffer = null;
+    let brownNoiseNode = null;
+    let noiseGain = null;
+    let precomputedBrownSamples = null;
+    let precomputedBrownRate = 48000;
+    let noiseShouldPlay = false;
+
+    let volBarHideTimer = null;
+    let volSnapTimer = null;
+
+    function getCtx() {
+      if (!actx) {
+        try {
+          actx = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+          return null;
+        }
+        masterGain = actx.createGain();
+        masterGain.gain.value = currentVolume;
+        masterGain.connect(actx.destination);
+      }
+      if (actx.state === "suspended") {
+        actx.resume().catch(() => {});
+      }
+      return actx;
+    }
+
+    function applyMasterGain() {
+      if (!masterGain || !actx) return;
+      const now = actx.currentTime;
+      masterGain.gain.cancelScheduledValues(now);
+      masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+      masterGain.gain.linearRampToValueAtTime(currentVolume, now + 0.05);
+    }
+
+    function setVolumeSilent(v) {
+      currentVolume = Math.max(0, Math.min(1, v));
+      if (currentVolume > 0) lastNonZeroVolume = currentVolume;
+      applyMasterGain();
+      if (DOM.volSlider) DOM.volSlider.value = String(Math.round(currentVolume * 100));
+    }
+
+    function renderVolumeBar(snap = false) {
+      if (!DOM.volumeBar || !DOM.volumeBarFill) return;
+      DOM.volumeBarFill.classList.toggle("snapping", snap);
+      if (!snap) void DOM.volumeBarFill.offsetHeight;
+      DOM.volumeBarFill.style.height = (currentVolume * 100).toFixed(2) + "%";
+      DOM.volumeBar.classList.add("visible");
+    }
+
+    function showVolumeIndicator() {
+      renderVolumeBar(false);
+      clearTimeout(volSnapTimer);
+      clearTimeout(volBarHideTimer);
+
+      volSnapTimer = setTimeout(() => {
+        const snapped = Math.round(currentVolume * 10) / 10;
+        if (Math.abs(snapped - currentVolume) > 0.001) {
+          setVolumeSilent(snapped);
+          StorageManager.scheduleSavePrefs();
+        }
+        renderVolumeBar(true);
+        volBarHideTimer = setTimeout(() => {
+          if (DOM.volumeBar) DOM.volumeBar.classList.remove("visible");
+        }, 750);
+      }, 350);
+    }
+
+    function setVolume(v) {
+      setVolumeSilent(v);
+      showVolumeIndicator();
+      StorageManager.scheduleSavePrefs();
+    }
+
+    function toggleMute() {
+      getCtx();
+      if (currentVolume > 0) {
+        lastNonZeroVolume = currentVolume;
+        setVolume(0);
+      } else {
+        setVolume(lastNonZeroVolume > 0 ? lastNonZeroVolume : 0.5);
+      }
+    }
+
+    async function playWatchTick(preview = false) {
+      if (!preview && !isSwitchActive(DOM.tickToggle)) return;
+      const ctx = getCtx();
+      if (!ctx || !masterGain) return;
+
+      if (ctx.state === "suspended") {
+        try { await ctx.resume(); } catch (e) { return; }
+      }
+      if (ctx.state !== "running") return;
+      if (!preview && !isSwitchActive(DOM.tickToggle)) return;
+
+      const now = ctx.currentTime;
+      if (!watchTickNoiseBuffer) {
+        const length = Math.ceil(ctx.sampleRate * 0.045);
+        watchTickNoiseBuffer = ctx.createBuffer(1, length, ctx.sampleRate);
+        const data = watchTickNoiseBuffer.getChannelData(0);
+        for (let i = 0; i < length; i++) {
+          const t = i / length;
+          data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 3);
+        }
+      }
+
+      const noise = ctx.createBufferSource();
+      noise.buffer = watchTickNoiseBuffer;
+      const filter = ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(2150, now);
+      filter.Q.setValueAtTime(1.35, now);
+      const clickGain = ctx.createGain();
+      clickGain.gain.setValueAtTime(0.0001, now);
+      clickGain.gain.exponentialRampToValueAtTime(0.85, now + 0.0012);
+      clickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.024);
+      noise.connect(filter).connect(clickGain).connect(masterGain);
+      noise.start(now);
+      noise.stop(now + 0.026);
+
+      const resonator = ctx.createOscillator();
+      const resonanceGain = ctx.createGain();
+      resonator.type = "triangle";
+      resonator.frequency.setValueAtTime(1420, now);
+      resonanceGain.gain.setValueAtTime(0.0001, now);
+      resonanceGain.gain.exponentialRampToValueAtTime(0.12, now + 0.001);
+      resonanceGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.038);
+      resonator.connect(resonanceGain).connect(masterGain);
+      resonator.start(now);
+      resonator.stop(now + 0.042);
+    }
+
+    function playSound(name) {
+      const ctx = getCtx();
+      if (!ctx || !masterGain) return;
+      const t0 = ctx.currentTime;
+      const master = ctx.createGain();
+      master.gain.value = 0.6;
+      master.connect(masterGain);
+
+      function tone(freq, start, dur, opts = {}) {
+        const { vol = 0.05, attack = 0.006, type = "sine", sweepTo = null } = opts;
+        const t = t0 + start;
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = type;
+        o.frequency.setValueAtTime(freq, t);
+        if (sweepTo) o.frequency.exponentialRampToValueAtTime(sweepTo, t + dur);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(vol, t + attack);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g).connect(master);
+        o.start(t);
+        o.stop(t + dur + 0.05);
+      }
+
+      switch (name) {
+        case "start":
+          tone(523.25, 0,    0.18, { vol: 0.055 });
+          tone(783.99, 0.07, 0.28, { vol: 0.045 });
+          break;
+        case "pause":
+          tone(392.00, 0, 0.16, { vol: 0.045 });
+          break;
+        case "skip":
+          tone(880.00,  0,    0.09, { vol: 0.04 });
+          tone(1174.66, 0.05, 0.11, { vol: 0.035 });
+          break;
+        case "reset":
+          tone(700, 0, 0.35, { vol: 0.04, sweepTo: 220 });
+          break;
+        case "focusDone":
+          tone(659.25,  0, 0.7,  { vol: 0.05,  attack: 0.01 });
+          tone(1318.51, 0, 0.5,  { vol: 0.025, attack: 0.01 });
+          tone(1975.53, 0, 0.35, { vol: 0.012, attack: 0.01 });
+          break;
+        case "breakDone":
+          tone(880.00,  0,    0.4, { vol: 0.05,  attack: 0.01 });
+          tone(1318.51, 0.06, 0.5, { vol: 0.04,  attack: 0.01 });
+          break;
+      }
+    }
+
+    function buildBrownNoiseSamples(sampleRate) {
+      if (precomputedBrownSamples && precomputedBrownRate === sampleRate) {
+        return precomputedBrownSamples;
+      }
+      const bufferSize = sampleRate * 3;
+      const samples = new Float32Array(bufferSize);
+      let lastOut = 0.0;
+      let maxAbs = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        const v = (lastOut + (0.02 * white)) / 1.02;
+        lastOut = v;
+        samples[i] = v;
+        const a = v < 0 ? -v : v;
+        if (a > maxAbs) maxAbs = a;
+      }
+      if (maxAbs > 0) {
+        const k = 0.9 / maxAbs;
+        for (let i = 0; i < bufferSize; i++) samples[i] *= k;
+      }
+      precomputedBrownSamples = samples;
+      precomputedBrownRate = sampleRate;
+      return samples;
+    }
+
+    const scheduleIdle = window.requestIdleCallback || (cb => setTimeout(cb, 250));
+    scheduleIdle(() => buildBrownNoiseSamples(48000));
+
+    function startBrownNoise() {
+      const ctx = getCtx();
+      if (!ctx) return;
+      if (!brownNoiseNode) {
+        const samples = buildBrownNoiseSamples(ctx.sampleRate);
+        const buffer = ctx.createBuffer(1, samples.length, ctx.sampleRate);
+        buffer.copyToChannel(samples, 0);
+
+        brownNoiseNode = ctx.createBufferSource();
+        brownNoiseNode.buffer = buffer;
+        brownNoiseNode.loop = true;
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.value = 600;
+
+        noiseGain = ctx.createGain();
+        noiseGain.gain.value = 0;
+
+        brownNoiseNode.connect(filter).connect(noiseGain).connect(masterGain);
+        brownNoiseNode.start();
+      }
+      const now = ctx.currentTime;
+      noiseGain.gain.cancelScheduledValues(now);
+      noiseGain.gain.setValueAtTime(noiseGain.gain.value, now);
+      noiseGain.gain.linearRampToValueAtTime(NOISE_VOL, now + TRANSITION_S);
+    }
+
+    function stopBrownNoise() {
+      if (!noiseGain || !actx) return;
+      const now = actx.currentTime;
+      noiseGain.gain.cancelScheduledValues(now);
+      noiseGain.gain.setValueAtTime(noiseGain.gain.value, now);
+      noiseGain.gain.linearRampToValueAtTime(0, now + TRANSITION_S);
+    }
+
+    function updateBrownNoise() {
+      const shouldPlay = isSwitchActive(DOM.noiseToggle) && AppState.running && AppState.isFocus();
+      if (shouldPlay === noiseShouldPlay) return;
+      noiseShouldPlay = shouldPlay;
+      if (shouldPlay) startBrownNoise();
+      else            stopBrownNoise();
+    }
+
+    return {
+      getCtx,
+      getVolume: () => currentVolume,
+      setVolume,
+      setVolumeSilent,
+      showVolumeIndicator,
+      toggleMute,
+      playWatchTick,
+      playSound,
+      updateBrownNoise
+    };
+  })();
+
+  /* =========================================================================
+   * 4. PAYSAGES NATURELS & TRANSITION CONTINUE (BreakBackgroundManager)
+   * ========================================================================= */
+  const BreakBackgroundManager = (() => {
+    const WIKIMEDIA_PURE_NATURE_CATEGORIES = [
+      "Category:Featured_pictures_of_mountains",
+      "Category:Featured_pictures_of_waterfalls",
+      "Category:Featured_pictures_of_lakes",
+      "Category:Featured_pictures_of_forests",
+      "Category:Featured_pictures_of_valleys",
+      "Category:Featured_pictures_of_coasts",
+      "Category:Featured_pictures_of_glaciers",
+      "Category:Featured_pictures_of_deserts",
+      "Category:Featured_pictures_of_rivers",
+      "Category:Featured_pictures_of_islands",
+      "Category:Featured_pictures_of_canyons",
+      "Category:Featured_pictures_of_cliffs",
+      "Category:Featured_pictures_of_volcanoes",
+      "Category:Featured_pictures_of_fjords"
+    ];
+
+    const BING_ARCHIVE_MARKETS = ["US-en", "GB-en", "CA-en", "AU-en"];
+
+    const LOCAL_IMAGES = [
+  {
+    "url": "./images/03.jpg",
+    "caption": "Waterfall in Skaftafell, Vatnajökull National Park, Iceland"
+  },
+  {
+    "url": "./images/04.jpg",
+    "caption": "Mangrove trees at twilight, Walakiri Beach, island of Sumba, Indonesia"
+  },
+  {
+    "url": "./images/06.jpg",
+    "caption": "Sunset at Ruby Beach in Olympic National Park, Washington state"
+  },
+  {
+    "url": "./images/08.jpg",
+    "caption": "Rock formations and sand dunes in the Sahara, Djanet, Algeria"
+  },
+  {
+    "url": "./images/12.jpg",
+    "caption": "Balsamroot wildflowers below the Teton Mountains, Grand Teton National Park"
+  },
+  {
+    "url": "./images/14.jpg",
+    "caption": "Aerial view of Everglades National Park, Florida"
+  },
+  {
+    "url": "./images/16.jpg",
+    "caption": "A group of elephants, Amboseli National Park, Kenya"
+  },
+  {
+    "url": "./images/3840px-01_Gorges_du_Tarn_Roc_des_Hourtous.jpg",
+    "caption": "01 Gorges du Tarn Roc des Hourtous"
+  },
+  {
+    "url": "./images/3840px-21-224-5054_NNP_Synevyr_RB_18.jpg",
+    "caption": "21 224 5054 NNP Synevyr RB 18"
+  },
+  {
+    "url": "./images/3840px-Almsee_Nordbucht-4224.jpg",
+    "caption": "Almsee Nordbucht 4224"
+  },
+  {
+    "url": "./images/3840px-Beskid_Sadecki_in_winter_2016_05.jpg",
+    "caption": "Beskid Sadecki in winter 2016 05"
+  },
+  {
+    "url": "./images/Afternoon_at_Tennfjorden,_Raftsundet,_Hinn%C3%B8ya,_Norway,_2015_September.jpg",
+    "caption": "Afternoon at Tennfjorden, Raftsundet, Hinnøya, Norway, 2015 September"
+  },
+  {
+    "url": "./images/Afternoon_at_Tennfjorden,_Raftsundet,_Hinn%C3%B8ya,_Norway,_2015_September_(02).jpg",
+    "caption": "Afternoon at Tennfjorden, Raftsundet, Hinnøya, Norway, 2015 September (02)"
+  },
+  {
+    "url": "./images/Fv55_road_at_Sognefjellet,_2013_June.jpg",
+    "caption": "Fv55 road at Sognefjellet, 2013 June"
+  }
+];
+
+    const _htmlDecoder = document.createElement("textarea");
+    function decodeHtmlText(raw) {
+      if (!raw) return "";
+      _htmlDecoder.innerHTML = String(raw).replace(/<[^>]*>/g, " ");
+      return _htmlDecoder.value.replace(/\s+/g, " ").trim();
+    }
+
+    function formatLocationCaption(raw, maxLen = 84) {
+      let clean = decodeHtmlText(raw)
+        .replace(/^File:/i, "")
+        .replace(/\.(jpe?g|png|webp)$/i, "")
+        .replace(/_/g, " ")
+        .replace(/\s*\(©[^)]*\)\s*/g, "")
+        .replace(/\s*©.*$/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (clean.length > maxLen) {
+        clean = clean.slice(0, maxLen - 1).trimEnd() + "…";
+      }
+      return clean;
+    }
+
+    function normalizeTokens(raw) {
+      return String(raw || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
+        .replace(/[^a-zA-Z]+/g, " ")
+        .toLowerCase()
+        .replace(/\bnatural bridges?\b/g, "natural arch")
+        .trim();
+    }
+
+    const LANDSCAPE_WHITELIST_RE = /\b(national park|nature reserve|wilderness|mountain|mountains|mount|peak|peaks|summit|ridge|pass|alpine|alps|dolomites|rockies|himalaya|andes|lake|lakes|loch|lagoon|pond|river|stream|creek|delta|estuary|waterfall|falls|cascade|forest|woods|woodland|rainforest|jungle|taiga|pine|redwood|sequoia|grove|autumn|fall foliage|ocean|sea|coast|coastline|shore|beach|cove|bay|peninsula|cape|strait|cliff|cliffs|fjord|archipelago|island|atoll|coral reef|glacier|iceberg|ice sheet|tundra|arctic|antarctica|canyon|gorge|ravine|valley|meadow|prairie|steppe|savanna|highlands|moor|heath|plateau|mesa|butte|badlands|desert|dune|dunes|oasis|volcano|crater|caldera|geyser|hot spring|aurora|northern lights)\b/;
+    const NON_LANDSCAPE_BLACKLIST_RE = /\b(city|cities|ville|stadt|ciudad|citta|town|bourg|dorf|pueblo|village|borgo|urban|urbain|skyline|downtown|metropolis|street|rue|strasse|calle|avenue|boulevard|alley|ruelle|town square|public square|plaza|piazza|building|buildings|batiment|gebaude|edificio|skyscraper|gratte ciel|clock tower|bell tower|watchtower|water tower|radio tower|observation tower|eiffel|turm|torre|bridge|pont|brucke|puente|ponte|viaduct|viaduc|aqueduct|aqueduc|castle|chateau|schloss|burg|castillo|castello|palace|palais|palast|palacio|palazzo|fort|fortress|forteresse|festung|citadel|citadelle|ruins|ruine|ruinen|ruinas|cathedral|cathedrale|catedral|church|eglise|kirche|iglesia|chiesa|chapel|chapelle|kapelle|capilla|abbey|abbaye|abtei|abadia|monastery|monastere|kloster|monasterio|temple|shrine|sanctuaire|mosque|mosquee|pagoda|pagode|stupa|minaret|basilica|basilique|museum|musee|library|bibliotheque|theater|theatre|opera|stadium|stade|arena|university|universite|campus|parliament|parlement|capitol|station|gare|bahnhof|estacion|railway|chemin de fer|train|tram|subway|metro|harbor|harbour|port|hafen|puerto|porto|marina|pier|jetee|dock|quai|wharf|lighthouse|phare|leuchtturm|faro|windmill|moulin|windmuhle|molino|farm|ferme|bauernhof|granja|vineyard|vignoble|weinberg|plantation|terrace|terrasse|rice field|riziere|orchard|verger|pasture|paturage|garden|jardin|garten|monument|statue|memorial|sculpture|cross|croix|cemetery|cimetiere|festival|carnival|market|marche|bazaar|lantern|lanterne|fireworks|artifice|architecture|interior|interieur|rooftop|toit|hotel|resort|house|houses|maison|haus|casa|cottage|cabin|cabane|chalet|hut|refuge|tent|tente|camp|camping|barn|grange|silo|wall|mur|muraille|remparts|fence|cloture|boardwalk|passerelle|sentier|trail|path|chemin|road|route|highway|autoroute|traffic|car|cars|voiture|auto|bus|truck|camion|bicycle|velo|motorcycle|boat|boats|bateau|boot|barco|ship|navire|schiff|yacht|ferry|canoe|kayak|sailboat|voilier|fishing|peche|airport|aeroport|airplane|avion|helicopter|factory|usine|dam|barrage|reservoir|canal|ecluse|mine|quarry|carriere|wind turbine|eolienne|pylon|pylone|antenna|antenne|observatory|observatoire|cave|caves|cavern|caverns|grotte|grottes|caverne|gouffre|aven|hohle|cueva|grotta|cenote|sinkhole|subterranean|underground|stalactite|stalagmite|speleothem|close up|closeup|macro|flower|fleur|blume|blossom|petal|petale|mushroom|champignon|fungus|insect|insecte|beetle|spider|araignee|butterfly|papillon|bird|oiseau|vogel|puffin|penguin|manchot|flamingo|flamant|owl|hibou|chouette|eagle|aigle|hawk|falcon|heron|swan|cygne|duck|canard|goose|seagull|animal|wildlife|faune|fox|renard|bear|ours|wolf|loup|deer|cerf|elk|moose|elan|reindeer|renne|caribou|bison|buffalo|horse|cheval|sheep|mouton|cow|vache|goat|chevre|ibex|bouquetin|chamois|marmot|marmotte|squirrel|ecureuil|rabbit|lapin|hare|lievre|frog|grenouille|turtle|tortue|lizard|snake|serpent|whale|baleine|dolphin|dauphin|seal|phoque|otter|loutre|fish|poisson|shark|requin|jellyfish|meduse|painting|peinture|gemalde|drawing|dessin|illustration|diagram|map|carte|karte|chart|logo|flag|drapeau|portrait|people|person|personne|homme|femme|enfant|tourist|touriste|hiker|randonneur|climber|alpiniste|skier|skieur|surfer|swimmer|crowd|foule|satellite|from space|astronaut|spacecraft|iss|orbit|orbital|nebula|galaxy|planet|moon|eclipse)\b/;
+    const CATEGORY_BLACKLIST_RE = /\b(paintings|drawings|illustrations|diagrams|maps|architecture|buildings|cities|towns|villages|townscapes|cityscapes|cultural landscapes|bridges|castles|churches|temples|monuments|animals|birds|insects|flowers|mushrooms|spaceflight|satellites|people|humans|vehicles|watercraft|ships|boats|roads|railways|agriculture|farms|lighthouses|towers|ruins|structures|caves|caverns|subterranean|speleothems)\b/;
+
+    const poolCache = { wikimedia: [], bingNature: [] };
+    const usedWikimediaCats = new Set();
+    const usedBingMarkets = new Set();
+
+    function pickUnseenItem(list) {
+      if (!list || !list.length) return null;
+      const unseen = list.filter(item => !AppState.seenBgUrls.includes(item.url));
+      const sourceList = unseen.length ? unseen : list;
+      return sourceList[Math.floor(Math.random() * sourceList.length)];
+    }
+
+    function dedupePool(list) {
+      const map = new Map();
+      for (const item of list) {
+        if (item && item.url && !map.has(item.url)) map.set(item.url, item);
+      }
+      return Array.from(map.values());
+    }
+
+    async function fetchWikimediaNatureItem() {
+      const unseenCached = poolCache.wikimedia.filter(item => !AppState.seenBgUrls.includes(item.url));
+      if (unseenCached.length >= 5) {
+        return unseenCached[Math.floor(Math.random() * unseenCached.length)];
+      }
+
+      const availableCats = WIKIMEDIA_PURE_NATURE_CATEGORIES.filter(c => !usedWikimediaCats.has(c));
+      const catPool = availableCats.length ? availableCats : WIKIMEDIA_PURE_NATURE_CATEGORIES;
+      const cat = catPool[Math.floor(Math.random() * catPool.length)];
+      usedWikimediaCats.add(cat);
+
+      const apiUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=categorymembers&gcmtitle=${encodeURIComponent(cat)}&gcmtype=file&gcmlimit=500&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=2560&format=json&origin=*`;
+      const res = await fetch(apiUrl);
+      const data = await res.json();
+      const pages = data && data.query && data.query.pages ? Object.values(data.query.pages) : [];
+      const items = [];
+
+      for (const p of pages) {
+        const ii = p.imageinfo && p.imageinfo[0];
+        if (!ii || !ii.width || !ii.height) continue;
+        if (ii.width <= ii.height || ii.width < MIN_BG_WIDTH || ii.height < MIN_BG_HEIGHT) continue;
+
+        let chosen = "";
+        if (ii.thumburl && ii.thumbwidth >= MIN_BG_WIDTH && ii.thumbheight >= MIN_BG_HEIGHT) {
+          chosen = ii.thumburl;
+        } else if (ii.url && (!ii.size || ii.size <= 14 * 1024 * 1024)) {
+          chosen = ii.url;
+        }
+        if (!chosen || !/\.(jpe?g|png|webp)(\?|$)/i.test(chosen)) continue;
+
+        const meta = ii.extmetadata || {};
+        const objectName = (meta.ObjectName && meta.ObjectName.value) || "";
+        const imgDesc = (meta.ImageDescription && meta.ImageDescription.value) || "";
+        const rawDesc = [p.title || "", objectName, imgDesc].join(" ").replace(/<[^>]*>/g, " ").slice(0, 600);
+        const rawCats = ((meta.Categories && meta.Categories.value) || "").replace(/<[^>]*>/g, " ");
+
+        if (NON_LANDSCAPE_BLACKLIST_RE.test(normalizeTokens(rawDesc))) continue;
+        if (CATEGORY_BLACKLIST_RE.test(normalizeTokens(rawCats))) continue;
+
+        items.push({ url: chosen, caption: formatLocationCaption(objectName || p.title || "") });
+      }
+
+      if (items.length) poolCache.wikimedia = dedupePool(poolCache.wikimedia.concat(items));
+      return pickUnseenItem(poolCache.wikimedia);
+    }
+
+    async function fetchBingNatureArchiveItem() {
+      const unseenCached = poolCache.bingNature.filter(item => !AppState.seenBgUrls.includes(item.url));
+      if (unseenCached.length >= 5) {
+        return unseenCached[Math.floor(Math.random() * unseenCached.length)];
+      }
+
+      const availableMarkets = BING_ARCHIVE_MARKETS.filter(m => !usedBingMarkets.has(m));
+      const mktPool = availableMarkets.length ? availableMarkets : BING_ARCHIVE_MARKETS;
+      const mkt = mktPool[Math.floor(Math.random() * mktPool.length)];
+      usedBingMarkets.add(mkt);
+
+      const res = await fetch(`https://bing.npanuhin.me/${mkt}.json`);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        const items = [];
+        for (const entry of data) {
+          if (!entry || !entry.url) continue;
+          const normTitle = normalizeTokens(`${entry.title || ""} ${entry.copyright || ""}`);
+          const normAll = normalizeTokens(`${entry.title || ""} ${entry.copyright || ""} ${entry.url}`);
+          if (NON_LANDSCAPE_BLACKLIST_RE.test(normAll)) continue;
+          if (!LANDSCAPE_WHITELIST_RE.test(normTitle)) continue;
+
+          items.push({ url: entry.url, caption: formatLocationCaption(entry.title || entry.copyright || "") });
+        }
+        if (items.length) poolCache.bingNature = dedupePool(poolCache.bingNature.concat(items));
+      }
+      return pickUnseenItem(poolCache.bingNature);
+    }
+
+    function pickLocalImage() {
+      if (!LOCAL_IMAGES.length) return null;
+      const recent = AppState.seenBgUrls.slice(-8);
+      const unseen = LOCAL_IMAGES.filter(i => !recent.includes(i.url));
+      const pool = unseen.length ? unseen : LOCAL_IMAGES;
+      const item = pool[Math.floor(Math.random() * pool.length)];
+      return { url: item.url, caption: item.caption || "", isLocal: true };
+    }
+
+    async function pickCachedRemoteBgItem() {
+      if (!("caches" in window)) return null;
+      try {
+        const cache = await caches.open(REMOTE_BG_CACHE);
+        const requests = await cache.keys();
+        if (!requests.length) return null;
+        const urls = requests.map(r => r.url);
+        const recent = AppState.seenBgUrls.slice(-8);
+        const unseen = urls.filter(u => !recent.includes(u));
+        const pool = unseen.length ? unseen : urls;
+        const chosenUrl = pool[Math.floor(Math.random() * pool.length)];
+        const filePart = decodeURIComponent(chosenUrl.split("/").pop().split("?")[0] || "");
+        return { url: chosenUrl, caption: formatLocationCaption(filePart), isCachedRemote: true };
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function resolveNextBgItem(source) {
+      if (!navigator.onLine) {
+        if (source !== "local") {
+          const cachedRemote = await pickCachedRemoteBgItem();
+          if (cachedRemote) return cachedRemote;
+        }
+        return pickLocalImage();
+      }
+      if (source === "local") return pickLocalImage();
+      if (source === "auto") {
+        try {
+          const item = await fetchWikimediaNatureItem();
+          if (item) return item;
+        } catch (e) {}
+        return (await pickCachedRemoteBgItem()) || pickLocalImage();
+      }
+
+      const chosenSource = source === "mix"
+        ? (Math.random() < 0.65 ? "wikimedia" : "bing-nature")
+        : source;
+
+      try {
+        if (chosenSource === "wikimedia") {
+          const item = await fetchWikimediaNatureItem();
+          if (item) return item;
+        } else if (chosenSource === "bing-nature") {
+          const item = await fetchBingNatureArchiveItem();
+          if (item) return item;
+        }
+      } catch (e) {}
+
+      try {
+        const fallback = chosenSource === "wikimedia"
+          ? await fetchBingNatureArchiveItem()
+          : await fetchWikimediaNatureItem();
+        if (fallback) return fallback;
+      } catch (e) {}
+
+      return await pickCachedRemoteBgItem();
+    }
+
+    const _lumCanvas = document.createElement("canvas");
+    _lumCanvas.width = 32;
+    _lumCanvas.height = 32;
+    const _lumCtx = _lumCanvas.getContext("2d", { willReadFrequently: true });
+
+    function computeAdaptiveContrast(imgEl) {
+      try {
+        if (!_lumCtx) return { veilOpacity: 0.18, textSlope: 1.18 };
+        _lumCtx.drawImage(imgEl, 0, 0, 32, 32);
+        const data = _lumCtx.getImageData(0, 0, 32, 32).data;
+        let totalLum = 0;
+        const pixels = data.length / 4;
+        for (let i = 0; i < data.length; i += 4) {
+          totalLum += (0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]) / 255;
+        }
+        const lum = Math.max(0, Math.min(1, totalLum / pixels));
+        return {
+          veilOpacity: Number((0.08 + lum * 0.24).toFixed(3)),
+          textSlope: Number((1.24 - lum * 0.12).toFixed(3))
+        };
+      } catch (e) {
+        return { veilOpacity: 0.18, textSlope: 1.18 };
+      }
+    }
+
+    const _blurCanvas = document.createElement("canvas");
+    _blurCanvas.width = 480;
+    _blurCanvas.height = 270;
+    const _blurCtx = _blurCanvas.getContext("2d");
+
+    function bakeBlurredBreakImage(imgEl, textSlope) {
+      try {
+        if (!_blurCtx) return "";
+        const w = _blurCanvas.width;
+        const h = _blurCanvas.height;
+        _blurCtx.save();
+        _blurCtx.clearRect(0, 0, w, h);
+        _blurCtx.filter = `blur(10px) brightness(${(textSlope * 100).toFixed(1)}%)`;
+        _blurCtx.drawImage(imgEl, -16, -16, w + 32, h + 32);
+        _blurCtx.restore();
+        return _blurCanvas.toDataURL("image/jpeg", 0.82);
+      } catch (e) {
+        return "";
+      }
+    }
+
+    let activeBg = null;
+    let preloadedBg = null;
+    let isFetchingBg = false;
+    let isPreloadingBg = false;
+    let activeReqId = 0;
+    let preloadReqId = 0;
+    let revealRaf = null;
+
+    function syncGeometry() {
+      if (!activeBg || !DOM.el.classList.contains("break-image-ready")) return;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      if (!vw || !vh) return;
+      const ratio = activeBg.aspectRatio || (16 / 9);
+      let coverW = vw;
+      let coverH = vw / ratio;
+      if (coverH < vh) {
+        coverH = vh;
+        coverW = vh * ratio;
+      }
+      DOM.el.style.backgroundSize = `${coverW.toFixed(1)}px ${coverH.toFixed(1)}px`;
+    }
+
+    function applyReadyBackground(bgObj) {
+      activeBg = bgObj;
+      DOM.bgLayer.style.backgroundImage = `url("${bgObj.url}")`;
+      DOM.el.style.backgroundImage = `url("${bgObj.blurredUrl || bgObj.url}")`;
+      DOM.el.classList.add("break-image-ready");
+      syncGeometry();
+    }
+
+    function setBreakPhotoRevealed(revealed) {
+      cancelAnimationFrame(revealRaf);
+      if (revealed && activeBg) {
+        DOM.el.classList.add("break-image-ready");
+        syncGeometry();
+        void DOM.el.offsetWidth;
+        revealRaf = requestAnimationFrame(() => {
+          DOM.el.classList.add("break-image-revealed");
+        });
+      } else {
+        DOM.el.classList.remove("break-image-revealed");
+      }
+    }
+
+    function clearPreload() {
+      preloadReqId++;
+      isPreloadingBg = false;
+      preloadedBg = null;
+    }
+
+    function clear(keepPreload = false) {
+      activeReqId++;
+      isFetchingBg = false;
+      activeBg = null;
+      cancelAnimationFrame(revealRaf);
+      if (!keepPreload) clearPreload();
+      DOM.bgCaptionEl.classList.remove("visible");
+      DOM.bgLayer.classList.remove("active");
+      if (DOM.bgVeil) DOM.bgVeil.style.opacity = "0";
+      DOM.el.classList.remove("break-image-revealed", "break-image-ready");
+      DOM.el.style.backgroundImage = "";
+      DOM.el.style.backgroundSize = "";
+    }
+
+    function fetchValidBreakImage(source, isCancelled, attempt = 0) {
+      if (isCancelled() || attempt > 8) return Promise.resolve(null);
+
+      return resolveNextBgItem(source).then(item => {
+        if (isCancelled() || !item || !item.url) return null;
+        const { url, caption, isLocal } = item;
+
+        return new Promise(resolve => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.decoding = "async";
+
+          img.onload = async () => {
+            if (img.decode) { try { await img.decode(); } catch (e) {} }
+            if (isCancelled()) { resolve(null); return; }
+            StorageManager.markBgSeen(url);
+
+            if (!isLocal && (img.naturalWidth < MIN_BG_WIDTH || img.naturalHeight < MIN_BG_HEIGHT)) {
+              resolve(fetchValidBreakImage(source, isCancelled, attempt + 1));
+              return;
+            }
+
+            const contrast = computeAdaptiveContrast(img);
+            const aspectRatio = (img.naturalWidth && img.naturalHeight)
+              ? (img.naturalWidth / img.naturalHeight)
+              : (16 / 9);
+
+            resolve({
+              url,
+              blurredUrl: bakeBlurredBreakImage(img, contrast.textSlope) || img.currentSrc || url,
+              caption: caption || "",
+              veilOpacity: contrast.veilOpacity,
+              textSlope: contrast.textSlope,
+              aspectRatio
+            });
+          };
+
+          img.onerror = () => {
+            if (isCancelled()) { resolve(null); return; }
+            StorageManager.markBgSeen(url);
+            resolve(fetchValidBreakImage(source, isCancelled, attempt + 1));
+          };
+
+          img.src = url;
+        });
+      });
+    }
+
+    function startPreload(source) {
+      isPreloadingBg = true;
+      const reqId = ++preloadReqId;
+      fetchValidBreakImage(source, () => reqId !== preloadReqId).then(res => {
+        if (reqId !== preloadReqId) return;
+        isPreloadingBg = false;
+        if (!res) return;
+
+        if (AppState.isBreak() && isSwitchActive(DOM.bgToggle) && !activeBg) {
+          applyReadyBackground(res);
+          update();
+        } else {
+          preloadedBg = res;
+        }
+      });
+    }
+
+    function startLoad(source) {
+      isFetchingBg = true;
+      const reqId = ++activeReqId;
+      fetchValidBreakImage(source, () => reqId !== activeReqId).then(res => {
+        if (reqId !== activeReqId) return;
+        isFetchingBg = false;
+        if (!res) return;
+
+        applyReadyBackground(res);
+        update();
+      });
+    }
+
+    function promotePreloadedIfAvailable() {
+      if (preloadedBg && preloadedBg.url) {
+        const ready = preloadedBg;
+        preloadedBg = null;
+        isPreloadingBg = false;
+        applyReadyBackground(ready);
+        return true;
+      }
+      return false;
+    }
+
+    function syncCaptionVisibility() {
+      const show = DOM.popup.classList.contains("visible")
+        && AppState.running
+        && AppState.isBreak()
+        && isSwitchActive(DOM.bgToggle)
+        && Boolean(activeBg && activeBg.url && activeBg.caption);
+
+      if (show) DOM.bgCaptionEl.textContent = activeBg.caption;
+      DOM.bgCaptionEl.classList.toggle("visible", show);
+    }
+
+    function update() {
+      const bgEnabled = isSwitchActive(DOM.bgToggle);
+      if (!bgEnabled) {
+        if (activeBg || isFetchingBg || preloadedBg || isPreloadingBg) clear(false);
+        return;
+      }
+
+      if (AppState.isFocus()) {
+        if (activeBg || isFetchingBg) clear(true);
+        if (AppState.running && AppState.remaining <= 35 && !preloadedBg && !isPreloadingBg) {
+          const source = DOM.bgSourceSelect ? DOM.bgSourceSelect.value : "auto";
+          startPreload(source);
+        }
+        return;
+      }
+
+      if (!activeBg && !isFetchingBg && !isPreloadingBg) {
+        const source = DOM.bgSourceSelect ? DOM.bgSourceSelect.value : "auto";
+        startLoad(source);
+      }
+
+      const show = AppState.running && Boolean(activeBg && activeBg.url);
+      DOM.bgLayer.classList.toggle("active", show);
+      if (DOM.bgVeil) DOM.bgVeil.style.opacity = show ? String(activeBg.veilOpacity) : "0";
+      setBreakPhotoRevealed(show);
+      syncCaptionVisibility();
+    }
+
+    function hotSwapSource() {
+      clearPreload();
+      const isBreakActive = AppState.isBreak() && isSwitchActive(DOM.bgToggle) && AppState.running;
+      if (!isBreakActive || !activeBg) {
+        clear(false);
+        return false;
+      }
+      const source = DOM.bgSourceSelect ? DOM.bgSourceSelect.value : "auto";
+      startLoad(source);
+      return true;
+    }
+
+    function resetPools() {
+      poolCache.wikimedia = [];
+      poolCache.bingNature = [];
+      usedWikimediaCats.clear();
+      usedBingMarkets.clear();
+    }
+
+    return {
+      clear,
+      update,
+      syncGeometry,
+      promotePreloadedIfAvailable,
+      syncCaptionVisibility,
+      hotSwapSource,
+      resetPools
+    };
+  })();
+
+  /* =========================================================================
+   * 5. MOTEUR TYPOGRAPHIQUE (TypographyEngine)
+   * ========================================================================= */
+  const TypographyEngine = (() => {
+    const WDTH_MIN = 25;
+    const WDTH_MAX = 151;
+    const WGHT_RUNNING = 300;
+    const WGHT_PAUSED  = 100;
+    const ROND_RUNNING = 0;
+    const ROND_PAUSED  = 100;
+    const EASE_IN_OUT = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+    const mc = document.createElement("canvas").getContext("2d");
+    const fitCache = new Map();
+    let measureEl = null;
+    let recheckFontRaf = null;
+
+    let inkHRatio     = 0.72;
+    let inkShiftRatio = 0.035;
+
+    let currentWdth   = 100;
+    let currentWght   = WGHT_PAUSED;
+    let currentRond   = ROND_PAUSED;
+    let currentFs     = 100;
+    let currentShift  = 0;
+    let isFitted      = false;
+    let stateAnimRaf  = null;
+
+    function getMeasureEl() {
+      if (measureEl && measureEl.isConnected) return measureEl;
+      measureEl = document.createElement("span");
+      measureEl.setAttribute("aria-hidden", "true");
+      measureEl.style.cssText = [
+        "position:fixed",
+        "left:-9999px",
+        "top:-9999px",
+        "visibility:hidden",
+        "pointer-events:none",
+        "white-space:nowrap",
+        "line-height:1",
+        'font-family:"Google Sans Flex", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+        "font-weight:100",
+        "font-variant-numeric:tabular-nums",
+        'font-feature-settings:"tnum" 1',
+        "letter-spacing:-0.03em"
+      ].join(";");
+      document.body.appendChild(measureEl);
+      return measureEl;
+    }
+
+    function updateInkMetrics(wght) {
+      try {
+        if (!mc) return;
+        mc.font = `${wght} 1000px "Google Sans Flex", -apple-system, sans-serif`;
+        mc.fontStretch = "normal";
+        const m = mc.measureText("00:00");
+        const inkA  = (m.actualBoundingBoxAscent  || 720) / 1000;
+        const inkD  = (m.actualBoundingBoxDescent || 0)   / 1000;
+        const fontA = (m.fontBoundingBoxAscent    || 850) / 1000;
+        const fontD = (m.fontBoundingBoxDescent   || 200) / 1000;
+        if (inkA + inkD > 0.3) {
+          inkHRatio     = inkA + inkD;
+          inkShiftRatio = (inkA - inkD - fontA + fontD) / 2;
+        }
+      } catch (e) {}
+    }
+
+    function computeFitForState(targetWght, targetRond) {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      if (!vw || !vh) return null;
+
+      const text = DOM.el.textContent || "25:00";
+      const cacheKey = `${vw}x${vh}|${text.length}|${targetWght}|${targetRond}`;
+      const cached = fitCache.get(cacheKey);
+      if (cached) return cached;
+
+      const margin = Math.min(vw, vh) * 0.04;
+      const maxW = Math.max(0, vw - 2 * margin);
+      const maxH = Math.max(0, vh - 2 * margin);
+      if (!maxW || !maxH) return null;
+
+      updateInkMetrics(targetWght);
+
+      const mEl = getMeasureEl();
+      mEl.textContent = text;
+      mEl.style.fontSize = "1000px";
+
+      // Vérifier que l'axe variable "wdth" est bien actif avant la recherche binaire
+      mEl.style.fontVariationSettings = `"wght" ${targetWght}, "wdth" ${WDTH_MIN}, "opsz" 144, "ROND" ${targetRond}`;
+      const wMin = mEl.getBoundingClientRect().width;
+      mEl.style.fontVariationSettings = `"wght" ${targetWght}, "wdth" ${WDTH_MAX}, "opsz" 144, "ROND" ${targetRond}`;
+      const wMax = mEl.getBoundingClientRect().width;
+
+      if (!wMin || !wMax || wMax <= wMin * 1.2) {
+        const refW = wMax || 2750;
+        const fs = Math.min((maxW * 1000) / refW, (maxH * 1000) / (1000 * inkHRatio));
+        if (!recheckFontRaf) {
+          recheckFontRaf = requestAnimationFrame(() => {
+            recheckFontRaf = null;
+            if (isFitted) fit();
+          });
+        }
+        return { wdth: 100, fs, shift: inkShiftRatio * fs };
+      }
+
+      let bestW = WDTH_MIN;
+      let bestFs = 0;
+      let bestDiff = Infinity;
+      let lo = WDTH_MIN;
+      let hi = WDTH_MAX;
+
+      for (let i = 0; i < 16; i++) {
+        const mid = (lo + hi) / 2;
+        mEl.style.fontVariationSettings = `"wght" ${targetWght}, "wdth" ${mid.toFixed(2)}, "opsz" 144, "ROND" ${targetRond}`;
+        const boxW = mEl.getBoundingClientRect().width;
+        if (!boxW) { lo = mid; continue; }
+
+        const inkW = boxW;
+        const inkH = 1000 * inkHRatio;
+        const fsW = (maxW * 1000) / inkW;
+        const fsH = (maxH * 1000) / inkH;
+        const fs  = Math.min(fsW, fsH);
+
+        const textW = (inkW * fs) / 1000;
+        const textH = (inkH * fs) / 1000;
+        const diffX = vw - textW;
+        const diffY = vh - textH;
+
+        if (Math.abs(diffX - diffY) < bestDiff) {
+          bestDiff = Math.abs(diffX - diffY);
+          bestW = mid;
+          bestFs = fs;
+        }
+        if (diffX > diffY) lo = mid;
+        else               hi = mid;
+      }
+
+      if (!bestFs) return null;
+      const result = {
+        wdth: bestW,
+        fs: bestFs,
+        shift: inkShiftRatio * bestFs
+      };
+      if (fitCache.size > 32) fitCache.clear();
+      fitCache.set(cacheKey, result);
+      return result;
+    }
+
+    function applyVariation() {
+      DOM.el.style.fontVariationSettings =
+        `"wght" ${currentWght.toFixed(1)}, "wdth" ${currentWdth.toFixed(2)}, "opsz" 144, "ROND" ${currentRond.toFixed(1)}`;
+    }
+
+    function cancelAnimation() {
+      if (stateAnimRaf !== null) {
+        cancelAnimationFrame(stateAnimRaf);
+        stateAnimRaf = null;
+      }
+    }
+
+    function fit(clearCache = false) {
+      if (clearCache) fitCache.clear();
+      cancelAnimation();
+
+      const targetWght = AppState.running ? WGHT_RUNNING : WGHT_PAUSED;
+      const targetRond = AppState.running ? ROND_RUNNING : ROND_PAUSED;
+      const res = computeFitForState(targetWght, targetRond);
+      if (!res) return false;
+
+      currentWght  = targetWght;
+      currentRond  = targetRond;
+      currentWdth  = res.wdth;
+      currentFs    = res.fs;
+      currentShift = res.shift;
+
+      DOM.el.style.fontSize   = currentFs.toFixed(2) + "px";
+      DOM.el.style.lineHeight = "1";
+      DOM.el.style.transform  = `translateY(${currentShift.toFixed(2)}px)`;
+      applyVariation();
+      BreakBackgroundManager.syncGeometry();
+      isFitted = true;
+      return true;
+    }
+
+    function transitionToRunningState(isRunning) {
+      if (!isFitted || prefersReducedMotion()) {
+        fit();
+        return;
+      }
+      const targetWght = isRunning ? WGHT_RUNNING : WGHT_PAUSED;
+      const targetRond = isRunning ? ROND_RUNNING : ROND_PAUSED;
+      if (currentWght === targetWght && currentRond === targetRond && stateAnimRaf === null) return;
+
+      cancelAnimation();
+
+      const startWght  = currentWght;
+      const startRond  = currentRond;
+      const startWdth  = currentWdth;
+      const startFs    = currentFs;
+      const startShift = currentShift;
+
+      const targetFit = computeFitForState(targetWght, targetRond);
+      if (!targetFit) return;
+
+      const endWdth  = targetFit.wdth;
+      const endFs    = targetFit.fs;
+      const endShift = targetFit.shift;
+
+      const baseFs = startFs || endFs;
+      DOM.el.style.fontSize = baseFs.toFixed(2) + "px";
+
+      const animMs = 750;
+      const startTime = performance.now();
+      function step(now) {
+        const t = Math.min(1, (now - startTime) / animMs);
+        const eased = EASE_IN_OUT(t);
+        currentWght  = startWght  + (targetWght - startWght)  * eased;
+        currentRond  = startRond  + (targetRond - startRond)  * eased;
+        currentWdth  = startWdth  + (endWdth    - startWdth)  * eased;
+        currentFs    = startFs    + (endFs      - startFs)    * eased;
+        currentShift = startShift + (endShift   - startShift) * eased;
+
+        if (t >= 1) {
+          stateAnimRaf = null;
+          currentWght  = targetWght;
+          currentRond  = targetRond;
+          currentWdth  = endWdth;
+          currentFs    = endFs;
+          currentShift = endShift;
+          DOM.el.style.fontSize  = endFs.toFixed(2) + "px";
+          DOM.el.style.transform = `translateY(${endShift.toFixed(2)}px)`;
+          applyVariation();
+          BreakBackgroundManager.syncGeometry();
+          return;
+        }
+
+        const scale = baseFs > 0 ? (currentFs / baseFs) : 1;
+        DOM.el.style.transform = `translateY(${currentShift.toFixed(2)}px) scale(${scale.toFixed(4)})`;
+        applyVariation();
+        stateAnimRaf = requestAnimationFrame(step);
+      }
+      stateAnimRaf = requestAnimationFrame(step);
+    }
+
+    function clearCacheAndRefit() {
+      fitCache.clear();
+      if (isFitted) fit();
+    }
+
+    return {
+      getMeasureEl,
+      fit,
+      transitionToRunningState,
+      applyVariation,
+      clearCacheAndRefit,
+      isReady: () => isFitted
+    };
+  })();
+
+  /* =========================================================================
+   * 6. CONTRÔLEUR DU MINUTEUR, FAVICON, MEDIA SESSION & WAKE LOCK
+   * ========================================================================= */
+  const TimerController = (() => {
+    let lastRunning = null;
+    let lastRenderedLength = null;
+    let lastRenderedTimeText = null;
+    let lastRenderedTimerIndex = null;
+
+    const faviconCanvas = document.createElement("canvas");
+    faviconCanvas.width = 64;
+    faviconCanvas.height = 64;
+    const faviconCtx = faviconCanvas.getContext("2d");
+    let faviconLink = document.querySelector('link[rel~="icon"]');
+    if (!faviconLink) {
+      faviconLink = document.createElement("link");
+      faviconLink.rel = "icon";
+      faviconLink.type = "image/png";
+      document.head.appendChild(faviconLink);
+    }
+    let lastFaviconKey = "";
+    const darkModeQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+
+    function updateFavicon(progressPct) {
+      if (!faviconCtx) return;
+      const ratio = Math.max(0, Math.min(1, progressPct / 100));
+      const step = Math.round(ratio * 120);
+      const dark = !darkModeQuery || darkModeQuery.matches;
+      const key = `${step}-${AppState.running ? 1 : 0}-${dark ? 1 : 0}`;
+      if (key === lastFaviconKey) return;
+      lastFaviconKey = key;
+
+      const cx = 32, cy = 32, r = 30;
+      const activeColor = dark ? "#ffffff" : "#1c1c1e";
+      const pausedColor = dark ? "rgba(255, 255, 255, 0.78)" : "rgba(28, 28, 30, 0.72)";
+      faviconCtx.clearRect(0, 0, 64, 64);
+
+      if (ratio > 0) {
+        faviconCtx.beginPath();
+        if (ratio < 0.999) faviconCtx.moveTo(cx, cy);
+        faviconCtx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + ratio * Math.PI * 2);
+        if (ratio < 0.999) faviconCtx.closePath();
+        faviconCtx.fillStyle = AppState.running ? activeColor : pausedColor;
+        faviconCtx.fill();
+      } else {
+        faviconCtx.beginPath();
+        faviconCtx.arc(cx, cy, 5, 0, Math.PI * 2);
+        faviconCtx.fillStyle = pausedColor;
+        faviconCtx.fill();
+      }
+      faviconLink.href = faviconCanvas.toDataURL("image/png");
+    }
+
+    if (darkModeQuery) {
+      const onThemeChange = () => {
+        lastFaviconKey = "";
+        const total = AppState.sequence[AppState.idx] || 1;
+        const progress = Math.min(100, Math.max(0, (1 - AppState.remaining / total) * 100));
+        updateFavicon(progress);
+      };
+      if (darkModeQuery.addEventListener) darkModeQuery.addEventListener("change", onThemeChange);
+      else if (darkModeQuery.addListener) darkModeQuery.addListener(onThemeChange);
+    }
+
+    let lastMediaMetaKey = "";
+    let lastMediaPosAt = 0;
+
+    function updateMediaSession(forcePos = false) {
+      if (!("mediaSession" in navigator)) return;
+      try {
+        const text = fmt(AppState.remaining);
+        const phaseLabel = AppState.isBreak() ? "Break" : "Focus";
+        const intent = DOM.sessionIntentInput ? DOM.sessionIntentInput.value.trim() : "";
+        const title = `${text} · ${phaseLabel}`;
+        const artist = intent || "Pomodoro";
+        const metaKey = `${title}|${artist}`;
+
+        if (metaKey !== lastMediaMetaKey && typeof MediaMetadata !== "undefined") {
+          lastMediaMetaKey = metaKey;
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title,
+            artist,
+            album: "Pomodoro Ultimate"
+          });
+        }
+
+        navigator.mediaSession.playbackState = AppState.running ? "playing" : "paused";
+
+        const now = performance.now();
+        if (typeof navigator.mediaSession.setPositionState === "function" && (forcePos || now - lastMediaPosAt >= 900)) {
+          lastMediaPosAt = now;
+          const duration = Math.max(1, AppState.sequence[AppState.idx] || 1);
+          const position = Math.max(0, Math.min(duration, duration - AppState.remaining));
+          navigator.mediaSession.setPositionState({
+            duration,
+            playbackRate: 1.0,
+            position
+          });
+        }
+      } catch (e) {}
+    }
+
+    if ("mediaSession" in navigator) {
+      try {
+        navigator.mediaSession.setActionHandler("play", () => {
+          AudioEngine.getCtx();
+          if (!AppState.running) {
+            if (AppState.remaining <= 0) AppState.remaining = AppState.sequence[AppState.idx];
+            toggle();
+          }
+        });
+        navigator.mediaSession.setActionHandler("pause", () => {
+          if (AppState.running) toggle();
+        });
+        navigator.mediaSession.setActionHandler("nexttrack", () => {
+          advance(false);
+        });
+      } catch (e) {}
+    }
+
+    let wakeLockSentinel = null;
+    async function syncWakeLock() {
+      if (!("wakeLock" in navigator)) return;
+      if (AppState.running && document.visibilityState === "visible") {
+        if (!wakeLockSentinel) {
+          try {
+            wakeLockSentinel = await navigator.wakeLock.request("screen");
+            wakeLockSentinel.addEventListener("release", () => { wakeLockSentinel = null; });
+          } catch (e) {}
+        }
+      } else if (wakeLockSentinel) {
+        try { await wakeLockSentinel.release(); } catch (e) {}
+        wakeLockSentinel = null;
+      }
+    }
+    document.addEventListener("visibilitychange", syncWakeLock);
+
+    function sendDesktopNotification(title, body) {
+      if (!isSwitchActive(DOM.notifToggle) || !("Notification" in window)) return;
+      if (Notification.permission === "granted") {
+        new Notification(title, { body });
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then(permission => {
+          if (permission === "granted") new Notification(title, { body });
+        });
+      }
+    }
+
+    function updateCycleIndicator() {
+      if (!DOM.cycleIndicatorEl) return;
+      const totalFocus = Math.max(1, Math.floor(AppState.sequence.length / 2));
+      if (DOM.cycleIndicatorEl.children.length !== totalFocus) {
+        DOM.cycleIndicatorEl.innerHTML = Array.from({ length: totalFocus }, () => '<span class="cycle-dot"></span>').join("");
+      }
+      const completedFocus = Math.ceil(AppState.idx / 2);
+      Array.from(DOM.cycleIndicatorEl.children).forEach((dot, i) => {
+        dot.classList.toggle("done", i < completedFocus);
+      });
+      DOM.cycleIndicatorEl.classList.toggle("visible", DOM.popup.classList.contains("visible"));
+    }
+
+    function syncTimeTrackingBaseline() {
+      lastRenderedTimeText = fmt(AppState.remaining);
+      lastRenderedTimerIndex = AppState.idx;
+    }
+
+    function render(opts = {}) {
+      const { immediateFit = false } = opts;
+      const text = fmt(AppState.remaining);
+
+      if (AppState.running && lastRenderedTimerIndex === AppState.idx &&
+          lastRenderedTimeText !== null && text !== lastRenderedTimeText) {
+        AudioEngine.playWatchTick();
+      }
+      lastRenderedTimeText = text;
+      lastRenderedTimerIndex = AppState.idx;
+
+      if (DOM.el.textContent !== text) {
+        const lengthChanged = lastRenderedLength !== null && text.length !== lastRenderedLength;
+        lastRenderedLength = text.length;
+        DOM.el.textContent = text;
+        if (lengthChanged && TypographyEngine.isReady()) {
+          TypographyEngine.fit();
+        }
+      } else if (lastRenderedLength === null) {
+        lastRenderedLength = text.length;
+      }
+
+      const nextTitle = text + (AppState.isBreak() ? " · break" : " · focus");
+      if (document.title !== nextTitle) document.title = nextTitle;
+
+      const total = AppState.sequence[AppState.idx] || 1;
+      const progress = Math.min(100, Math.max(0, (1 - AppState.remaining / total) * 100));
+      if (DOM.progressBar) {
+        const showBar = isSwitchActive(DOM.progressToggle);
+        DOM.progressBar.classList.toggle("hidden", !showBar);
+        if (showBar) DOM.progressBar.style.width = progress.toFixed(1) + "%";
+      }
+
+      updateFavicon(progress);
+      updateMediaSession(false);
+      updateCycleIndicator();
+
+      if (DOM.pomodoroCountEl) DOM.pomodoroCountEl.textContent = String(AppState.completedToday);
+      if (DOM.weeklyFocusTotalEl) DOM.weeklyFocusTotalEl.textContent = StorageManager.getWeeklyFocusSummary();
+
+      if (lastRunning !== AppState.running) {
+        lastRunning = AppState.running;
+        if (timerWorker) timerWorker.postMessage(AppState.running ? "start" : "stop");
+        document.body.classList.toggle("running", AppState.running);
+        if (immediateFit) TypographyEngine.fit();
+        else              TypographyEngine.transitionToRunningState(AppState.running);
+        syncWakeLock();
+      } else if (immediateFit && TypographyEngine.isReady()) {
+        TypographyEngine.fit();
+      }
+
+      AudioEngine.updateBrownNoise();
+      BreakBackgroundManager.update();
+    }
+
+    function toggle() {
+      AppState.running = !AppState.running;
+      AppState.stageStarted = true;
+      if (AppState.running) {
+        AppState.endAt = performance.now() + AppState.remaining * 1000;
+      }
+      syncTimeTrackingBaseline();
+      StorageManager.saveSessionState(true);
+      AudioEngine.playSound(AppState.running ? "start" : "pause");
+      render();
+    }
+
+    function advance(complete) {
+      const wasFocus = AppState.isFocus();
+
+      if (complete) {
+        if (wasFocus) {
+          const today = new Date().toDateString();
+          if (AppState.lastSavedDate !== today) {
+            AppState.completedToday = 1;
+            AppState.lastSavedDate = today;
+          } else {
+            AppState.completedToday++;
+          }
+          StorageManager.recordCompletedFocus(AppState.sequence[AppState.idx]);
+          StorageManager.savePrefs();
+          sendDesktopNotification("Pomodoro", "Focus session completed! Time for a break.");
+        } else {
+          sendDesktopNotification("Pomodoro", "Break finished! Back to focus.");
+        }
+        AudioEngine.playSound(wasFocus ? "focusDone" : "breakDone");
+        AppState.running = isSwitchActive(DOM.autoStartToggle);
+        AppState.stageStarted = AppState.running;
+      } else {
+        AudioEngine.playSound("skip");
+        AppState.running = false;
+        AppState.stageStarted = false;
+        UIController.showIndicator(!wasFocus ? "Skipped to Focus ⏭" : "Skipped to Break ⏭");
+      }
+
+      const nextIdx = (AppState.idx + 1) % AppState.sequence.length;
+      const nextIsBreak = (nextIdx % 2) === 1;
+
+      if (!(nextIsBreak && isSwitchActive(DOM.bgToggle) && BreakBackgroundManager.promotePreloadedIfAvailable())) {
+        BreakBackgroundManager.clear(nextIsBreak);
+      }
+
+      AppState.idx = nextIdx;
+      AppState.remaining = AppState.sequence[AppState.idx];
+      syncTimeTrackingBaseline();
+      if (AppState.running) AppState.endAt = performance.now() + AppState.remaining * 1000;
+
+      StorageManager.saveSessionState(true);
+      render({ immediateFit: !AppState.running });
+    }
+
+    function reset() {
+      AppState.running = false;
+      AppState.stageStarted = false;
+      BreakBackgroundManager.clear(false);
+      AppState.idx = 0;
+      AppState.remaining = AppState.sequence[0];
+      syncTimeTrackingBaseline();
+      StorageManager.saveSessionState(true);
+      AudioEngine.playSound("reset");
+      UIController.showIndicator("Reset ↺");
+      render({ immediateFit: true });
+    }
+
+    function tick() {
+      if (!AppState.running) return;
+      AppState.remaining = Math.max(0, (AppState.endAt - performance.now()) / 1000);
+      if (AppState.remaining <= 0) {
+        advance(true);
+        return;
+      }
+      StorageManager.saveSessionState(false);
+      render();
+    }
+
+    let timerWorker = null;
+    try {
+      const workerCode = `
+        let timerId = null;
+        function scheduleNext() {
+          const delay = 1000 - (Date.now() % 1000) + 4;
+          timerId = setTimeout(() => {
+            self.postMessage("tick");
+            scheduleNext();
+          }, delay);
+        }
+        self.onmessage = function(e) {
+          if (e.data === "start") {
+            if (timerId !== null) clearTimeout(timerId);
+            scheduleNext();
+          } else if (e.data === "stop") {
+            if (timerId !== null) {
+              clearTimeout(timerId);
+              timerId = null;
+            }
+          }
+        };
+      `;
+      const blob = new Blob([workerCode], { type: "application/javascript" });
+      timerWorker = new Worker(URL.createObjectURL(blob));
+      timerWorker.onmessage = () => tick();
+    } catch (e) {
+      setInterval(tick, 250);
+    }
+
+    function resetInternalTracking() {
+      lastRunning = false;
+      lastRenderedLength = null;
+      syncTimeTrackingBaseline();
+    }
+
+    return {
+      render,
+      toggle,
+      advance,
+      reset,
+      updateCycleIndicator,
+      syncTimeTrackingBaseline,
+      resetInternalTracking
+    };
+  })();
+
+  /* =========================================================================
+   * 7. INTERACTIONS & INTERFACE UTILISATEUR (UIController)
+   * ========================================================================= */
+  const UIController = (() => {
+    let indicatorTimer = null;
+
+    function showIndicator(text) {
+      if (!DOM.volumeIndicator) return;
+      DOM.volumeIndicator.textContent = text;
+      DOM.volumeIndicator.classList.add("visible");
+      clearTimeout(indicatorTimer);
+      indicatorTimer = setTimeout(() => DOM.volumeIndicator.classList.remove("visible"), 800);
+    }
+
+    function syncIntentVisibility() {
+      if (!DOM.sessionIntentDisplayEl || !DOM.sessionIntentInput) return;
+      const text = DOM.sessionIntentInput.value.trim();
+      const show = DOM.popup.classList.contains("visible") && Boolean(text);
+      if (show) DOM.sessionIntentDisplayEl.textContent = text;
+      DOM.sessionIntentDisplayEl.classList.toggle("visible", show);
+    }
+
+    const popupObserver = new MutationObserver(() => {
+      BreakBackgroundManager.syncCaptionVisibility();
+      TimerController.updateCycleIndicator();
+      syncIntentVisibility();
+    });
+    popupObserver.observe(DOM.popup, { attributes: true, attributeFilter: ["class"] });
+
+    const HOLD_PAUSE_MS  = 3000;
+    const HOLD_RESUME_MS = 1000;
+    let timerHoldRaf    = null;
+    let timerHoldStart  = 0;
+    let timerHoldDur    = 0;
+    let activePointerId = null;
+    let spaceHoldActive = false;
+
+    function cancelTimerHold() {
+      if (timerHoldRaf) {
+        cancelAnimationFrame(timerHoldRaf);
+        timerHoldRaf = null;
+      }
+      activePointerId = null;
+      if (DOM.holdPrompt) DOM.holdPrompt.classList.remove("visible");
+      if (DOM.holdPromptFill) DOM.holdPromptFill.style.width = "0%";
+    }
+
+    function startTimerHold() {
+      cancelTimerHold();
+      const targetPause = AppState.running;
+      timerHoldDur = targetPause ? HOLD_PAUSE_MS : HOLD_RESUME_MS;
+      timerHoldStart = performance.now();
+
+      if (DOM.holdPromptText) {
+        DOM.holdPromptText.textContent = targetPause ? "Hold to pause" : "Hold to resume";
+      }
+      if (DOM.holdPromptFill) DOM.holdPromptFill.style.width = "0%";
+      if (DOM.holdPrompt) DOM.holdPrompt.classList.add("visible");
+
+      function step(now) {
+        const elapsed = now - timerHoldStart;
+        const pct = Math.min(100, (elapsed / timerHoldDur) * 100);
+        if (DOM.holdPromptFill) DOM.holdPromptFill.style.width = pct.toFixed(2) + "%";
+
+        if (elapsed >= timerHoldDur) {
+          timerHoldRaf = null;
+          activePointerId = null;
+          spaceHoldActive = false;
+          if (DOM.holdPrompt) DOM.holdPrompt.classList.remove("visible");
+          if (DOM.holdPromptFill) DOM.holdPromptFill.style.width = "0%";
+          if (navigator.vibrate) navigator.vibrate(25);
+          TimerController.toggle();
+          return;
+        }
+        timerHoldRaf = requestAnimationFrame(step);
+      }
+      timerHoldRaf = requestAnimationFrame(step);
+    }
+
+    DOM.el.addEventListener("pointerdown", (e) => {
+      if (e.button !== undefined && e.button !== 0) return;
+      AudioEngine.getCtx();
+      if (!AppState.running && !AppState.stageStarted) {
+        if (AppState.remaining <= 0) AppState.remaining = AppState.sequence[AppState.idx];
+        TimerController.toggle();
+        return;
+      }
+      startTimerHold();
+      activePointerId = e.pointerId;
+      if (DOM.el.setPointerCapture) {
+        try { DOM.el.setPointerCapture(e.pointerId); } catch (err) {}
+      }
+    });
+
+    ["pointerup", "pointercancel"].forEach(ev =>
+      DOM.el.addEventListener(ev, (e) => {
+        if (activePointerId !== null && e.pointerId === activePointerId) cancelTimerHold();
+      })
+    );
+
+    window.addEventListener("blur", () => {
+      spaceHoldActive = false;
+      cancelTimerHold();
+    });
+
+    window.addEventListener("contextmenu", e => e.preventDefault());
+
+    window.addEventListener("wheel", (e) => {
+      if (e.target && e.target.tagName === "INPUT") return;
+      if (DOM.popup && DOM.popup.classList.contains("visible") && DOM.popup.contains(e.target)) return;
+      e.preventDefault();
+      AudioEngine.getCtx();
+      AudioEngine.setVolume(AudioEngine.getVolume() - e.deltaY * 0.001);
+    }, { passive: false });
+
+    if (DOM.volSlider) {
+      DOM.volSlider.addEventListener("input", () => {
+        AudioEngine.getCtx();
+        AudioEngine.setVolumeSilent(parseInt(DOM.volSlider.value, 10) / 100);
+        AudioEngine.showVolumeIndicator();
+      });
+      DOM.volSlider.addEventListener("change", StorageManager.scheduleSavePrefs);
+    }
+
+    let pillHideTimer = null;
+    let hideTimer = null;
+
+    const isTouchDevice = () =>
+      (window.matchMedia && window.matchMedia("(hover: none), (pointer: coarse)").matches) ||
+      ("ontouchstart" in window);
+
+    function revealTopPill() {
+      if (!DOM.topPill || DOM.popup.classList.contains("visible")) return;
+      DOM.topPill.classList.add("visible");
+      clearTimeout(pillHideTimer);
+      if (isTouchDevice()) return;
+      pillHideTimer = setTimeout(() => {
+        if (!DOM.topPill.classList.contains("hovered")) {
+          DOM.topPill.classList.remove("visible");
+        }
+      }, 1800);
+    }
+
+    function openPopup() {
+      clearTimeout(hideTimer);
+      clearTimeout(pillHideTimer);
+      if (DOM.topPill) {
+        DOM.topPill.classList.remove("visible", "hovered");
+        DOM.topPill.classList.add("hidden-by-popup");
+      }
+      DOM.popup.classList.add("visible");
+    }
+
+    function closePopup() {
+      DOM.popup.classList.remove("visible");
+      if (DOM.topPill) {
+        DOM.topPill.classList.remove("hidden-by-popup");
+        revealTopPill();
+      }
+    }
+
+    let ptrMoveScheduled = false;
+    window.addEventListener("pointermove", () => {
+      if (ptrMoveScheduled || DOM.popup.classList.contains("visible")) return;
+      ptrMoveScheduled = true;
+      requestAnimationFrame(() => {
+        ptrMoveScheduled = false;
+        revealTopPill();
+      });
+    }, { passive: true });
+
+    window.addEventListener("touchstart", revealTopPill, { passive: true });
+
+    DOM.hotZone.addEventListener("mouseenter", () => {
+      if (DOM.topPill) DOM.topPill.classList.add("hovered");
+      openPopup();
+    });
+
+    DOM.hotZone.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openPopup();
+    });
+
+    DOM.popup.addEventListener("mouseleave", () => {
+      if (DOM.factoryModalBackdrop && DOM.factoryModalBackdrop.classList.contains("visible")) return;
+      hideTimer = setTimeout(closePopup, 180);
+    });
+    DOM.popup.addEventListener("mouseenter", () => clearTimeout(hideTimer));
+
+    DOM.hotZone.addEventListener("mouseleave", (e) => {
+      if (DOM.topPill) DOM.topPill.classList.remove("hovered");
+      if (DOM.popup.contains(e.relatedTarget)) return;
+      hideTimer = setTimeout(closePopup, 140);
+    });
+
+    window.addEventListener("pointerdown", (e) => {
+      if (DOM.factoryModalBackdrop && DOM.factoryModalBackdrop.classList.contains("visible")) return;
+      if (!DOM.popup.classList.contains("visible")) return;
+      if (!DOM.popup.contains(e.target) && !DOM.hotZone.contains(e.target)) closePopup();
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && DOM.factoryModalBackdrop && DOM.factoryModalBackdrop.classList.contains("visible")) {
+        e.preventDefault();
+        closeFactoryModal();
+        return;
+      }
+      if (e.key === "Escape" && DOM.popup.classList.contains("visible")) {
+        e.preventDefault();
+        closePopup();
+        if (document.activeElement && DOM.popup.contains(document.activeElement)) {
+          document.activeElement.blur();
+        }
+        return;
+      }
+      if (e.code === "Space" && !e.repeat && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        if (e.target && (["INPUT", "SELECT", "TEXTAREA", "BUTTON"].includes(e.target.tagName) || e.target.getAttribute("role") === "switch")) return;
+        e.preventDefault();
+        AudioEngine.getCtx();
+        if (!AppState.running && !AppState.stageStarted) {
+          if (AppState.remaining <= 0) AppState.remaining = AppState.sequence[AppState.idx];
+          TimerController.toggle();
+          return;
+        }
+        spaceHoldActive = true;
+        startTimerHold();
+      }
+    });
+
+    window.addEventListener("keyup", (e) => {
+      if (e.code === "Space" && spaceHoldActive) {
+        e.preventDefault();
+        spaceHoldActive = false;
+        cancelTimerHold();
+        return;
+      }
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.target && ["INPUT", "SELECT", "TEXTAREA"].includes(e.target.tagName)) return;
+
+      if (e.code === "KeyN" && DOM.noiseToggle) {
+        e.preventDefault();
+        AudioEngine.getCtx();
+        setSwitchState(DOM.noiseToggle, !isSwitchActive(DOM.noiseToggle));
+        AudioEngine.updateBrownNoise();
+        StorageManager.savePrefs();
+      } else if (e.code === "KeyM") {
+        e.preventDefault();
+        AudioEngine.toggleMute();
+      }
+    });
+
+    // Switches accessibles au clic ET au clavier (Espace / Entrée)
+    function bindSwitch(elSwitch, onToggle) {
+      if (!elSwitch) return;
+      const trigger = () => {
+        const nextState = !isSwitchActive(elSwitch);
+        setSwitchState(elSwitch, nextState);
+        onToggle(nextState);
+        StorageManager.savePrefs();
+      };
+      elSwitch.addEventListener("click", trigger);
+      elSwitch.addEventListener("keydown", (e) => {
+        if (e.code === "Space" || e.key === "Enter") {
+          e.preventDefault();
+          e.stopPropagation();
+          trigger();
+        }
+      });
+    }
+
+    bindSwitch(DOM.noiseToggle, () => {
+      AudioEngine.getCtx();
+      AudioEngine.updateBrownNoise();
+    });
+
+    bindSwitch(DOM.progressToggle, () => {
+      TimerController.render();
+    });
+
+    bindSwitch(DOM.tickToggle, (active) => {
+      AudioEngine.getCtx();
+      if (active) AudioEngine.playWatchTick(true);
+    });
+
+    bindSwitch(DOM.notifToggle, (active) => {
+      if (active && "Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission();
+      }
+    });
+
+    bindSwitch(DOM.autoStartToggle, () => {});
+
+    bindSwitch(DOM.bgToggle, (active) => {
+      if (!active) BreakBackgroundManager.clear(false);
+      TimerController.render();
+    });
+
+    DOM.bgSourceSelect.addEventListener("change", () => {
+      if (!BreakBackgroundManager.hotSwapSource()) {
+        TimerController.render();
+      }
+      StorageManager.savePrefs();
+    });
+
+    function bindHoldButton(btn, fillEl, labelEl, idleText, holdingText, durationMs, onComplete) {
+      if (!btn || !fillEl || !labelEl) return;
+      let rafId = null;
+      let startAt = 0;
+      let pointerId = null;
+
+      function cancelHold() {
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+        pointerId = null;
+        fillEl.style.width = "0%";
+        labelEl.textContent = idleText;
+      }
+
+      btn.addEventListener("pointerdown", (e) => {
+        if (e.button !== undefined && e.button !== 0) return;
+        e.stopPropagation();
+        AudioEngine.getCtx();
+        cancelHold();
+        pointerId = e.pointerId;
+        if (btn.setPointerCapture) {
+          try { btn.setPointerCapture(e.pointerId); } catch (err) {}
+        }
+        startAt = performance.now();
+        labelEl.textContent = holdingText;
+
+        function step(now) {
+          const elapsed = now - startAt;
+          const pct = Math.min(100, (elapsed / durationMs) * 100);
+          fillEl.style.width = pct.toFixed(2) + "%";
+          if (elapsed >= durationMs) {
+            rafId = null;
+            pointerId = null;
+            fillEl.style.width = "0%";
+            labelEl.textContent = idleText;
+            if (navigator.vibrate) navigator.vibrate(25);
+            onComplete();
+            return;
+          }
+          rafId = requestAnimationFrame(step);
+        }
+        rafId = requestAnimationFrame(step);
+      });
+
+      ["pointerup", "pointercancel"].forEach(ev =>
+        btn.addEventListener(ev, (e) => {
+          if (pointerId !== null && e.pointerId === pointerId) cancelHold();
+        })
+      );
+      window.addEventListener("blur", cancelHold);
+    }
+
+    bindHoldButton(DOM.btnSkip, DOM.btnSkipFill, DOM.btnSkipLabel, "Skip", "Hold to skip…", 5000, () => {
+      closePopup();
+      TimerController.advance(false);
+    });
+
+    bindHoldButton(DOM.btnReset, DOM.btnResetFill, DOM.btnResetLabel, "Reset", "Hold to reset…", 5000, () => {
+      closePopup();
+      TimerController.reset();
+    });
+
+    function openFactoryModal() {
+      clearTimeout(hideTimer);
+      if (DOM.factoryModalBackdrop) DOM.factoryModalBackdrop.classList.add("visible");
+    }
+
+    function closeFactoryModal() {
+      if (DOM.factoryModalBackdrop) DOM.factoryModalBackdrop.classList.remove("visible");
+    }
+
+    async function performFactoryReset() {
+      closeFactoryModal();
+      closePopup();
+
+      try {
+        localStorage.removeItem("pomodoro-prefs");
+        localStorage.removeItem("pomodoro-session");
+        localStorage.removeItem("pomodoro-seen-bgs");
+        if (typeof window.name === "string" && window.name.startsWith("POMODORO_SESSION:")) {
+          window.name = "";
+        }
+      } catch (e) {}
+
+      if ("caches" in window) {
+        try {
+          const keys = await caches.keys();
+          await Promise.all(keys.map(k => caches.delete(k)));
+        } catch (e) {}
+      }
+
+      AppState.sequence = DEFAULT_SEQUENCE.map(m => m * 60);
+      AppState.idx = 0;
+      AppState.remaining = AppState.sequence[0];
+      AppState.running = false;
+      AppState.stageStarted = false;
+      AppState.completedToday = 0;
+      AppState.lastSavedDate = new Date().toDateString();
+      AppState.dailyHistory = {};
+      AppState.seenBgUrls = [];
+
+      BreakBackgroundManager.resetPools();
+      BreakBackgroundManager.clear(false);
+      StorageManager.applyPrefsToUI(DEFAULT_PREFS);
+      syncIntentVisibility();
+
+      TimerController.resetInternalTracking();
+      AudioEngine.playSound("reset");
+      showIndicator("All settings & data reset");
+      TimerController.render({ immediateFit: true });
+    }
+
+    bindHoldButton(DOM.btnFactoryReset, DOM.btnFactoryResetFill, DOM.btnFactoryResetLabel, "Reset all", "Hold…", 6000, openFactoryModal);
+
+    if (DOM.factoryCancelBtn) {
+      DOM.factoryCancelBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeFactoryModal();
+      });
+    }
+    if (DOM.factoryConfirmBtn) {
+      DOM.factoryConfirmBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        performFactoryReset();
+      });
+    }
+    if (DOM.factoryModalBackdrop) {
+      DOM.factoryModalBackdrop.addEventListener("pointerdown", (e) => {
+        e.stopPropagation();
+        if (e.target === DOM.factoryModalBackdrop) closeFactoryModal();
+      });
+    }
+
+    [DOM.focusInput, DOM.breakInput, DOM.longBreakInput].forEach(input => {
+      input.addEventListener("input", StorageManager.scheduleSavePrefs);
+    });
+
+    if (DOM.sessionIntentInput) {
+      DOM.sessionIntentInput.addEventListener("input", () => {
+        syncIntentVisibility();
+        StorageManager.scheduleSavePrefs();
+      });
+      DOM.sessionIntentInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          DOM.sessionIntentInput.blur();
+        }
+      });
+    }
+
+    DOM.applyBtn.addEventListener("click", () => {
+      const focusMin = Math.max(1, Math.min(480, parseInt(DOM.focusInput.value, 10) || DEFAULT_PREFS.focus));
+      const breakMin = Math.max(1, Math.min(60,  parseInt(DOM.breakInput.value, 10) || DEFAULT_PREFS.break));
+      const longBreakMin = Math.max(1, Math.min(120, parseInt(DOM.longBreakInput.value, 10) || DEFAULT_PREFS.longBreak));
+
+      const oldTotal = AppState.sequence[AppState.idx] || 0;
+      if (AppState.running) {
+        AppState.remaining = Math.max(0, (AppState.endAt - performance.now()) / 1000);
+      }
+      const elapsed = AppState.stageStarted ? Math.max(0, oldTotal - AppState.remaining) : 0;
+
+      AppState.sequence = [
+        focusMin * 60,
+        breakMin * 60,
+        focusMin * 60,
+        breakMin * 60,
+        focusMin * 60,
+        longBreakMin * 60
+      ];
+
+      AppState.remaining = Math.max(0, AppState.sequence[AppState.idx] - elapsed);
+      BreakBackgroundManager.clear(AppState.isFocus());
+      StorageManager.savePrefs();
+
+      if (AppState.remaining <= 0 && AppState.running) {
+        closePopup();
+        TimerController.advance(true);
+        return;
+      }
+
+      if (AppState.running) {
+        AppState.endAt = performance.now() + AppState.remaining * 1000;
+      }
+      TimerController.syncTimeTrackingBaseline();
+      StorageManager.saveSessionState(true);
+      TimerController.render({ immediateFit: !AppState.running });
+      closePopup();
+    });
+
+    return {
+      showIndicator,
+      isTouchDevice
+    };
+  })();
+
+  /* =========================================================================
+   * 8. INITIALISATION & PIPELINE DE RÉVÉLATION
+   * ========================================================================= */
+  StorageManager.loadAll();
+
+  const unlockAudioOnGesture = () => {
+    AudioEngine.getCtx();
+    window.removeEventListener("pointerdown", unlockAudioOnGesture, true);
+    window.removeEventListener("keydown", unlockAudioOnGesture, true);
+  };
+  window.addEventListener("pointerdown", unlockAudioOnGesture, { capture: true, passive: true });
+  window.addEventListener("keydown", unlockAudioOnGesture, { capture: true, passive: true });
+
+  if (UIController.isTouchDevice() && DOM.topPill) DOM.topPill.classList.add("visible");
+  TypographyEngine.applyVariation();
+  TimerController.render({ immediateFit: true });
+
+  let rzRaf = null;
+  window.addEventListener("resize", () => {
+    cancelAnimationFrame(rzRaf);
+    rzRaf = requestAnimationFrame(() => TypographyEngine.fit());
+  });
+
+  if (typeof ResizeObserver !== "undefined") {
+    new ResizeObserver(() => {
+      if (TypographyEngine.isReady()) TypographyEngine.fit();
+    }).observe(document.documentElement);
+  }
+
+  let revealed = false;
+  let revealAttempts = 0;
+
+  function revealTimer() {
+    if (revealed) return;
+    const ok = TypographyEngine.fit();
+    if (!ok && revealAttempts < 60) {
+      revealAttempts++;
+      requestAnimationFrame(revealTimer);
+      return;
+    }
+    revealed = true;
+    void DOM.el.offsetWidth;
+    requestAnimationFrame(() => {
+      document.body.classList.add("ready");
+    });
+  }
+
+  TypographyEngine.getMeasureEl();
+  const fontLoads = (document.fonts && document.fonts.load)
+    ? Promise.allSettled([
+        document.fonts.load('100 100px "Google Sans Flex"', "0123456789:"),
+        document.fonts.load('300 100px "Google Sans Flex"', "0123456789:")
+      ])
+    : Promise.resolve();
+
+  Promise.race([
+    fontLoads,
+    new Promise(resolve => setTimeout(resolve, 800))
+  ]).then(revealTimer);
+
+  if (document.fonts) {
+    if (document.fonts.ready) document.fonts.ready.then(TypographyEngine.clearCacheAndRefit);
+    if (document.fonts.addEventListener) {
+      document.fonts.addEventListener("loadingdone", TypographyEngine.clearCacheAndRefit);
+    }
+  }
+
+  /* ---------- Fenêtre d'information & Crédits (Hugo Maurin) ---------- */
+  (() => {
+    const btnInfo = document.getElementById("btn-info");
+    const infoBackdrop = document.getElementById("info-modal-backdrop");
+    const infoCloseBtn = document.getElementById("info-close-btn");
+    const popupEl = document.getElementById("popup");
+    if (!btnInfo || !infoBackdrop) return;
+
+    const openInfoModal = () => infoBackdrop.classList.add("visible");
+    const closeInfoModal = () => infoBackdrop.classList.remove("visible");
+
+    btnInfo.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openInfoModal();
+    });
+
+    if (infoCloseBtn) {
+      infoCloseBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeInfoModal();
+      });
+    }
+
+    if (popupEl) {
+      popupEl.addEventListener("mouseleave", (e) => {
+        if (infoBackdrop.classList.contains("visible")) {
+          e.stopImmediatePropagation();
+        }
+      }, true);
+    }
+
+    window.addEventListener("pointerdown", (e) => {
+      if (!infoBackdrop.classList.contains("visible")) return;
+      if (e.target === infoBackdrop) {
+        closeInfoModal();
+      }
+      e.stopImmediatePropagation();
+    }, true);
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && infoBackdrop.classList.contains("visible")) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        closeInfoModal();
+      }
+    }, true);
+  })();
+})();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
