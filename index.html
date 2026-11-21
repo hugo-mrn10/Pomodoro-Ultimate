@@ -435,6 +435,35 @@
   }
 
   /* Champs de temps */
+  .preset-pills {
+    display: flex;
+    gap: 6px;
+  }
+  .preset-pill {
+    flex: 1 1 0;
+    padding: 5px 8px;
+    background: rgba(255, 255, 255, 0.11);
+    border: none;
+    border-radius: 99px;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, transform 0.14s ease;
+  }
+  .preset-pill:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+  }
+  .preset-pill:active {
+    transform: scale(0.96);
+  }
+  .preset-pill.active {
+    background: #ffffff;
+    color: #1c1c1e;
+  }
+
   .time-inputs {
     display: flex;
     gap: 6px;
@@ -967,6 +996,11 @@
     </div>
 
     <div class="row">
+      <label for="overtime-toggle">Overtime</label>
+      <div id="overtime-toggle" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
+    </div>
+
+    <div class="row">
       <label for="notif-toggle">Notifications</label>
       <div id="notif-toggle" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
     </div>
@@ -994,6 +1028,11 @@
 
     <div class="row" style="flex-direction:column; align-items:stretch; gap:8px;">
       <label style="font-size:12px;">Duration (minutes)</label>
+      <div class="preset-pills" role="group" aria-label="Duration presets">
+        <button type="button" class="preset-pill active" data-focus="25" data-break="5" data-long="15">25 / 5</button>
+        <button type="button" class="preset-pill" data-focus="50" data-break="10" data-long="20">50 / 10</button>
+        <button type="button" class="preset-pill" data-focus="90" data-break="20" data-long="30">90 / 20</button>
+      </div>
       <div class="time-inputs">
         <div class="time-field">
           <span>Focus</span>
@@ -1061,6 +1100,7 @@
         <div class="info-row"><span>Pause / Resume</span><span class="info-kbd">Hold 3s / 1s</span></div>
         <div class="info-row"><span>Volume / Mute</span><span class="info-kbd">Scroll / M</span></div>
         <div class="info-row"><span>Brown noise</span><span class="info-kbd">N</span></div>
+        <div class="info-row"><span>Fullscreen</span><span class="info-kbd">F</span></div>
         <div class="info-row"><span>Settings</span><span class="info-kbd">Top pill / Esc</span></div>
       </div>
       <div class="info-credits">
@@ -1102,6 +1142,7 @@
     watchTick: true,
     notifications: false,
     autoStart: false,
+    overtime: false,
     natureBg: true,
     bgSource: "auto",
     volume: 1.0,
@@ -1125,6 +1166,8 @@
     tickToggle: document.getElementById("tick-toggle"),
     notifToggle: document.getElementById("notif-toggle"),
     autoStartToggle: document.getElementById("autostart-toggle"),
+    overtimeToggle: document.getElementById("overtime-toggle"),
+    presetPills: Array.from(document.querySelectorAll(".preset-pill")),
     bgToggle: document.getElementById("bg-toggle"),
     bgSourceSelect: document.getElementById("bg-source"),
     focusInput: document.getElementById("focus-dur"),
@@ -1164,6 +1207,9 @@
     running: false,
     stageStarted: false,
     endAt: 0,
+    overtime: false,
+    overtimeStartAt: 0,
+    overtimeCreditedSec: 0,
     completedToday: 0,
     lastSavedDate: new Date().toDateString(),
     dailyHistory: {},
@@ -1174,6 +1220,9 @@
     },
     isFocus() {
       return (this.idx % 2) === 0;
+    },
+    getOvertimeSec() {
+      return this.overtime ? Math.max(0, (performance.now() - this.overtimeStartAt) / 1000) : 0;
     }
   };
 
@@ -1183,6 +1232,13 @@
   function fmt(sec) {
     const t = Math.max(0, Math.ceil(sec));
     return String(Math.floor(t / 60)).padStart(2, "0") + ":" +
+           String(t % 60).padStart(2, "0");
+  }
+
+  function fmtOvertime(sec) {
+    const t = Math.max(0, Math.floor(sec));
+    if (t === 0) return "00:00";
+    return "-" + String(Math.floor(t / 60)).padStart(2, "0") + ":" +
            String(t % 60).padStart(2, "0");
   }
 
@@ -1230,6 +1286,17 @@
       pruneDailyHistory();
     }
 
+    function recordOvertimeFocus(extraSec) {
+      const add = Math.max(0, Math.round(extraSec));
+      if (!add) return;
+      const key = getDateKey();
+      if (!AppState.dailyHistory[key] || typeof AppState.dailyHistory[key] !== "object") {
+        AppState.dailyHistory[key] = { count: 0, focusSec: 0 };
+      }
+      AppState.dailyHistory[key].focusSec = (AppState.dailyHistory[key].focusSec || 0) + add;
+      pruneDailyHistory();
+    }
+
     function getWeeklyFocusSummary() {
       let totalSec = 0;
       let totalCount = 0;
@@ -1260,6 +1327,7 @@
           watchTick:      isSwitchActive(DOM.tickToggle),
           notifications:  isSwitchActive(DOM.notifToggle),
           autoStart:      isSwitchActive(DOM.autoStartToggle),
+          overtime:       isSwitchActive(DOM.overtimeToggle),
           natureBg:       isSwitchActive(DOM.bgToggle),
           bgSource:       DOM.bgSourceSelect.value,
           volume:         AudioEngine.getVolume(),
@@ -1289,6 +1357,8 @@
         remaining: Math.max(0, Number(liveRemaining.toFixed(2))),
         running: AppState.running,
         stageStarted: AppState.stageStarted,
+        overtime: AppState.overtime,
+        overtimeSec: Number(AppState.getOvertimeSec().toFixed(2)),
         savedAt: Date.now()
       });
       const commit = () => {
@@ -1320,6 +1390,7 @@
       setSwitchState(DOM.tickToggle,      prefs.watchTick);
       setSwitchState(DOM.notifToggle,     prefs.notifications);
       setSwitchState(DOM.autoStartToggle, prefs.autoStart);
+      setSwitchState(DOM.overtimeToggle,  prefs.overtime);
       setSwitchState(DOM.bgToggle,        prefs.natureBg);
 
       if (DOM.bgSourceSelect && Array.from(DOM.bgSourceSelect.options).some(o => o.value === prefs.bgSource)) {
@@ -1381,8 +1452,30 @@
         } catch (e) {}
       }
 
-      if (session && typeof session.idx === "number" && typeof session.remaining === "number") {
-        if (session.idx >= 0 && session.idx < AppState.sequence.length && session.remaining > 0) {
+      function applySessionObject(session) {
+        if (!session || typeof session.idx !== "number" || typeof session.remaining !== "number") return;
+        if (session.idx < 0 || session.idx >= AppState.sequence.length) return;
+
+        if (session.overtime === true && (session.idx % 2) === 0) {
+          const prevOt = Math.max(0, Number(session.overtimeSec) || 0);
+          const elapsedSec = typeof session.savedAt === "number"
+            ? Math.max(0, (Date.now() - session.savedAt) / 1000)
+            : 0;
+          AppState.idx = session.idx;
+          AppState.remaining = 0;
+          AppState.overtime = true;
+          AppState.overtimeCreditedSec = 0;
+          AppState.overtimeStartAt = performance.now() - (prevOt + elapsedSec) * 1000;
+          AppState.running = true;
+          AppState.stageStarted = true;
+          return;
+        }
+
+        AppState.overtime = false;
+        AppState.overtimeStartAt = 0;
+        AppState.overtimeCreditedSec = 0;
+
+        if (session.remaining > 0) {
           const wasRunning = session.running === true;
           const elapsedSec = (wasRunning && typeof session.savedAt === "number")
             ? Math.max(0, (Date.now() - session.savedAt) / 1000)
@@ -1405,17 +1498,62 @@
           }
         }
       }
+
+      applySessionObject(session);
+    }
+
+    function syncFromStorageEvent(e) {
+      if (!e || !e.newValue) return;
+      if (e.key === "pomodoro-prefs") {
+        try {
+          const saved = JSON.parse(e.newValue);
+          if (!saved || typeof saved !== "object") return;
+          const merged = { ...DEFAULT_PREFS, ...saved };
+          if (Array.isArray(saved.sequence) && saved.sequence.length === 6) {
+            AppState.sequence = saved.sequence;
+            if (!AppState.stageStarted && !AppState.overtime) {
+              AppState.remaining = AppState.sequence[AppState.idx];
+            }
+          }
+          if (saved.dailyHistory && typeof saved.dailyHistory === "object") {
+            AppState.dailyHistory = saved.dailyHistory;
+          }
+          const today = new Date().toDateString();
+          AppState.lastSavedDate = today;
+          if (saved.lastDate === today && typeof saved.completedToday === "number") {
+            AppState.completedToday = saved.completedToday;
+          }
+          applyPrefsToUI(merged);
+          UIController.syncPresetPills();
+          UIController.syncIntentVisibility();
+          TimerController.render({ immediateFit: !AppState.running });
+        } catch (err) {}
+      } else if (e.key === "pomodoro-session") {
+        try {
+          const session = JSON.parse(e.newValue);
+          if (!session) return;
+          const prevIdx = AppState.idx;
+          applySessionObject(session);
+          if (prevIdx !== AppState.idx) {
+            BreakBackgroundManager.clear(AppState.isFocus());
+          }
+          TimerController.syncTimeTrackingBaseline();
+          TimerController.render({ immediateFit: true });
+        } catch (err) {}
+      }
     }
 
     return {
       recordCompletedFocus,
+      recordOvertimeFocus,
       getWeeklyFocusSummary,
       savePrefs,
       scheduleSavePrefs,
       saveSessionState,
       markBgSeen,
       applyPrefsToUI,
-      loadAll
+      loadAll,
+      syncFromStorageEvent
     };
   })();
 
@@ -1441,6 +1579,7 @@
     let precomputedBrownSamples = null;
     let precomputedBrownRate = 48000;
     let noiseShouldPlay = false;
+    let noisePreFading = false;
 
     let volBarHideTimer = null;
     let volSnapTimer = null;
@@ -1749,17 +1888,45 @@
       noiseGain.gain.linearRampToValueAtTime(0, now + TRANSITION_S);
     }
 
+    function applyPreFadeRamp() {
+      if (!noiseGain || !actx || actx.state !== "running") return;
+      const now = actx.currentTime;
+      noiseGain.gain.cancelScheduledValues(now);
+      noiseGain.gain.setValueAtTime(noiseGain.gain.value, now);
+      noiseGain.gain.linearRampToValueAtTime(0, now + Math.max(0.15, AppState.remaining));
+    }
+
     function updateBrownNoise() {
       const shouldPlay = isSwitchActive(DOM.noiseToggle) && AppState.running && AppState.isFocus();
-      if (shouldPlay === noiseShouldPlay) {
-        if (shouldPlay && actx && actx.state !== "running") {
-          actx.resume().catch(() => {});
+      const shouldPreFade = shouldPlay && !AppState.overtime && !isSwitchActive(DOM.overtimeToggle) && AppState.remaining > 0 && AppState.remaining <= 3;
+
+      if (shouldPlay !== noiseShouldPlay) {
+        noiseShouldPlay = shouldPlay;
+        noisePreFading = false;
+        if (shouldPlay) {
+          startBrownNoise();
+          if (shouldPreFade) {
+            noisePreFading = true;
+            applyPreFadeRamp();
+          }
+        } else {
+          stopBrownNoise();
         }
         return;
       }
-      noiseShouldPlay = shouldPlay;
-      if (shouldPlay) startBrownNoise();
-      else            stopBrownNoise();
+
+      if (shouldPlay) {
+        if (actx && actx.state !== "running") {
+          actx.resume().catch(() => {});
+        }
+        if (shouldPreFade && !noisePreFading) {
+          noisePreFading = true;
+          applyPreFadeRamp();
+        } else if (!shouldPreFade && noisePreFading) {
+          noisePreFading = false;
+          startBrownNoise();
+        }
+      }
     }
 
     return {
@@ -2703,7 +2870,7 @@
       const onThemeChange = () => {
         lastFaviconKey = "";
         const total = AppState.sequence[AppState.idx] || 1;
-        const progress = Math.min(100, Math.max(0, (1 - AppState.remaining / total) * 100));
+        const progress = AppState.overtime ? 100 : Math.min(100, Math.max(0, (1 - AppState.remaining / total) * 100));
         updateFavicon(progress);
       };
       if (darkModeQuery.addEventListener) darkModeQuery.addEventListener("change", onThemeChange);
@@ -2716,8 +2883,8 @@
     function updateMediaSession(forcePos = false) {
       if (!("mediaSession" in navigator)) return;
       try {
-        const text = fmt(AppState.remaining);
-        const phaseLabel = AppState.isBreak() ? "Break" : "Focus";
+        const text = getDisplayTimeText();
+        const phaseLabel = AppState.overtime ? "Overtime" : (AppState.isBreak() ? "Break" : "Focus");
         const intent = DOM.sessionIntentInput ? DOM.sessionIntentInput.value.trim() : "";
         const title = `${text} · ${phaseLabel}`;
         const artist = intent || "Pomodoro";
@@ -2807,14 +2974,75 @@
       DOM.cycleIndicatorEl.classList.toggle("visible", DOM.popup.classList.contains("visible"));
     }
 
+    function getDisplayTimeText() {
+      return AppState.overtime ? fmtOvertime(AppState.getOvertimeSec()) : fmt(AppState.remaining);
+    }
+
     function syncTimeTrackingBaseline() {
-      lastRenderedTimeText = fmt(AppState.remaining);
+      lastRenderedTimeText = getDisplayTimeText();
       lastRenderedTimerIndex = AppState.idx;
+    }
+
+    function flushOvertimeCredit() {
+      if (!AppState.overtime) return;
+      const totalOt = Math.floor(AppState.getOvertimeSec());
+      const uncredited = Math.max(0, totalOt - AppState.overtimeCreditedSec);
+      if (uncredited > 0) {
+        StorageManager.recordOvertimeFocus(uncredited);
+        AppState.overtimeCreditedSec = totalOt;
+        StorageManager.savePrefs();
+      }
+      AppState.overtime = false;
+      AppState.overtimeStartAt = 0;
+      AppState.overtimeCreditedSec = 0;
+    }
+
+    function enterOvertime() {
+      const today = new Date().toDateString();
+      if (AppState.lastSavedDate !== today) {
+        AppState.completedToday = 1;
+        AppState.lastSavedDate = today;
+      } else {
+        AppState.completedToday++;
+      }
+      StorageManager.recordCompletedFocus(AppState.sequence[AppState.idx]);
+      StorageManager.savePrefs();
+      sendDesktopNotification("Pomodoro", "Focus session completed! Continuing in overtime.");
+      AudioEngine.playSound("focusDone");
+
+      AppState.overtime = true;
+      AppState.overtimeStartAt = performance.now();
+      AppState.overtimeCreditedSec = 0;
+      AppState.remaining = 0;
+      syncTimeTrackingBaseline();
+      StorageManager.saveSessionState(true);
+      render({ immediateFit: true });
+    }
+
+    function finishOvertimeToBreak() {
+      if (!AppState.overtime) return;
+      flushOvertimeCredit();
+      AudioEngine.playSound("start");
+
+      const nextIdx = (AppState.idx + 1) % AppState.sequence.length;
+      const nextIsBreak = (nextIdx % 2) === 1;
+      if (!(nextIsBreak && isSwitchActive(DOM.bgToggle) && BreakBackgroundManager.promotePreloadedIfAvailable())) {
+        BreakBackgroundManager.clear(nextIsBreak);
+      }
+
+      AppState.idx = nextIdx;
+      AppState.remaining = AppState.sequence[AppState.idx];
+      AppState.running = true;
+      AppState.stageStarted = true;
+      AppState.endAt = performance.now() + AppState.remaining * 1000;
+      syncTimeTrackingBaseline();
+      StorageManager.saveSessionState(true);
+      render({ immediateFit: true });
     }
 
     function render(opts = {}) {
       const { immediateFit = false } = opts;
-      const text = fmt(AppState.remaining);
+      const text = getDisplayTimeText();
 
       if (AppState.running && AppState.isFocus() && lastRenderedTimerIndex === AppState.idx &&
           lastRenderedTimeText !== null && text !== lastRenderedTimeText) {
@@ -2834,7 +3062,7 @@
         lastRenderedLength = text.length;
       }
 
-      const nextTitle = text + (AppState.isBreak() ? " · break" : " · focus");
+      const nextTitle = text + (AppState.overtime ? " · overtime" : (AppState.isBreak() ? " · break" : " · focus"));
       if (document.title !== nextTitle) document.title = nextTitle;
 
       const total = AppState.sequence[AppState.idx] || 1;
@@ -2881,6 +3109,7 @@
     }
 
     function advance(complete) {
+      flushOvertimeCredit();
       const wasFocus = AppState.isFocus();
 
       if (complete) {
@@ -2925,6 +3154,7 @@
     }
 
     function reset() {
+      flushOvertimeCredit();
       AppState.running = false;
       AppState.stageStarted = false;
       BreakBackgroundManager.clear(false);
@@ -2939,10 +3169,16 @@
 
     function tick() {
       if (!AppState.running) return;
-      AppState.remaining = Math.max(0, (AppState.endAt - performance.now()) / 1000);
-      if (AppState.remaining <= 0) {
-        advance(true);
-        return;
+      if (!AppState.overtime) {
+        AppState.remaining = Math.max(0, (AppState.endAt - performance.now()) / 1000);
+        if (AppState.remaining <= 0) {
+          if (AppState.isFocus() && isSwitchActive(DOM.overtimeToggle)) {
+            enterOvertime();
+            return;
+          }
+          advance(true);
+          return;
+        }
       }
       StorageManager.saveSessionState(false);
       render();
@@ -3007,6 +3243,7 @@
       toggle,
       advance,
       reset,
+      finishOvertimeToBreak,
       updateCycleIndicator,
       syncTimeTrackingBaseline,
       resetInternalTracking
@@ -3095,6 +3332,10 @@
     DOM.el.addEventListener("pointerdown", (e) => {
       if (e.button !== undefined && e.button !== 0) return;
       AudioEngine.getCtx();
+      if (AppState.overtime) {
+        TimerController.finishOvertimeToBreak();
+        return;
+      }
       if (!AppState.running && !AppState.stageStarted) {
         if (AppState.remaining <= 0) AppState.remaining = AppState.sequence[AppState.idx];
         TimerController.toggle();
@@ -3232,6 +3473,10 @@
         if (e.target && (["INPUT", "SELECT", "TEXTAREA", "BUTTON"].includes(e.target.tagName) || e.target.getAttribute("role") === "switch")) return;
         e.preventDefault();
         AudioEngine.getCtx();
+        if (AppState.overtime) {
+          TimerController.finishOvertimeToBreak();
+          return;
+        }
         if (!AppState.running && !AppState.stageStarted) {
           if (AppState.remaining <= 0) AppState.remaining = AppState.sequence[AppState.idx];
           TimerController.toggle();
@@ -3261,6 +3506,16 @@
       } else if (e.code === "KeyM") {
         e.preventDefault();
         AudioEngine.toggleMute();
+      } else if (e.code === "KeyF") {
+        e.preventDefault();
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+          const docEl = document.documentElement;
+          if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
+          else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+        } else {
+          if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+          else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        }
       }
     });
 
@@ -3304,6 +3559,14 @@
     });
 
     bindSwitch(DOM.autoStartToggle, () => {});
+
+    bindSwitch(DOM.overtimeToggle, (active) => {
+      if (!active && AppState.overtime) {
+        TimerController.finishOvertimeToBreak();
+      } else {
+        TimerController.render();
+      }
+    });
 
     bindSwitch(DOM.bgToggle, (active) => {
       if (!active) BreakBackgroundManager.clear(false);
@@ -3452,8 +3715,76 @@
       });
     }
 
+    function syncPresetPills() {
+      if (!DOM.presetPills) return;
+      const f = String(parseInt(DOM.focusInput.value, 10) || 0);
+      const b = String(parseInt(DOM.breakInput.value, 10) || 0);
+      const l = String(parseInt(DOM.longBreakInput.value, 10) || 0);
+      DOM.presetPills.forEach(pill => {
+        const match = pill.dataset.focus === f && pill.dataset.break === b && pill.dataset.long === l;
+        pill.classList.toggle("active", match);
+      });
+    }
+
+    function applyDurationValues(shouldClosePopup = true) {
+      const focusMin = Math.max(1, Math.min(480, parseInt(DOM.focusInput.value, 10) || DEFAULT_PREFS.focus));
+      const breakMin = Math.max(1, Math.min(60,  parseInt(DOM.breakInput.value, 10) || DEFAULT_PREFS.break));
+      const longBreakMin = Math.max(1, Math.min(120, parseInt(DOM.longBreakInput.value, 10) || DEFAULT_PREFS.longBreak));
+
+      const oldTotal = AppState.sequence[AppState.idx] || 0;
+      if (AppState.running && !AppState.overtime) {
+        AppState.remaining = Math.max(0, (AppState.endAt - performance.now()) / 1000);
+      }
+      const elapsed = AppState.stageStarted ? Math.max(0, oldTotal - AppState.remaining) : 0;
+
+      AppState.sequence = [
+        focusMin * 60,
+        breakMin * 60,
+        focusMin * 60,
+        breakMin * 60,
+        focusMin * 60,
+        longBreakMin * 60
+      ];
+
+      if (!AppState.overtime) {
+        AppState.remaining = Math.max(0, AppState.sequence[AppState.idx] - elapsed);
+      }
+      BreakBackgroundManager.clear(AppState.isFocus());
+      syncPresetPills();
+      StorageManager.savePrefs();
+
+      if (!AppState.overtime && AppState.remaining <= 0 && AppState.running) {
+        if (shouldClosePopup) closePopup();
+        TimerController.advance(true);
+        return;
+      }
+
+      if (AppState.running && !AppState.overtime) {
+        AppState.endAt = performance.now() + AppState.remaining * 1000;
+      }
+      TimerController.syncTimeTrackingBaseline();
+      StorageManager.saveSessionState(true);
+      TimerController.render({ immediateFit: !AppState.running });
+      if (shouldClosePopup) closePopup();
+    }
+
+    if (DOM.presetPills) {
+      DOM.presetPills.forEach(pill => {
+        pill.addEventListener("click", (e) => {
+          e.stopPropagation();
+          DOM.focusInput.value = pill.dataset.focus;
+          DOM.breakInput.value = pill.dataset.break;
+          DOM.longBreakInput.value = pill.dataset.long;
+          applyDurationValues(false);
+        });
+      });
+    }
+
     [DOM.focusInput, DOM.breakInput, DOM.longBreakInput].forEach(input => {
-      input.addEventListener("input", StorageManager.scheduleSavePrefs);
+      input.addEventListener("input", () => {
+        syncPresetPills();
+        StorageManager.scheduleSavePrefs();
+      });
     });
 
     if (DOM.sessionIntentInput) {
@@ -3469,48 +3800,13 @@
       });
     }
 
-    DOM.applyBtn.addEventListener("click", () => {
-      const focusMin = Math.max(1, Math.min(480, parseInt(DOM.focusInput.value, 10) || DEFAULT_PREFS.focus));
-      const breakMin = Math.max(1, Math.min(60,  parseInt(DOM.breakInput.value, 10) || DEFAULT_PREFS.break));
-      const longBreakMin = Math.max(1, Math.min(120, parseInt(DOM.longBreakInput.value, 10) || DEFAULT_PREFS.longBreak));
-
-      const oldTotal = AppState.sequence[AppState.idx] || 0;
-      if (AppState.running) {
-        AppState.remaining = Math.max(0, (AppState.endAt - performance.now()) / 1000);
-      }
-      const elapsed = AppState.stageStarted ? Math.max(0, oldTotal - AppState.remaining) : 0;
-
-      AppState.sequence = [
-        focusMin * 60,
-        breakMin * 60,
-        focusMin * 60,
-        breakMin * 60,
-        focusMin * 60,
-        longBreakMin * 60
-      ];
-
-      AppState.remaining = Math.max(0, AppState.sequence[AppState.idx] - elapsed);
-      BreakBackgroundManager.clear(AppState.isFocus());
-      StorageManager.savePrefs();
-
-      if (AppState.remaining <= 0 && AppState.running) {
-        closePopup();
-        TimerController.advance(true);
-        return;
-      }
-
-      if (AppState.running) {
-        AppState.endAt = performance.now() + AppState.remaining * 1000;
-      }
-      TimerController.syncTimeTrackingBaseline();
-      StorageManager.saveSessionState(true);
-      TimerController.render({ immediateFit: !AppState.running });
-      closePopup();
-    });
+    DOM.applyBtn.addEventListener("click", () => applyDurationValues(true));
 
     return {
       showIndicator,
-      isTouchDevice
+      isTouchDevice,
+      syncPresetPills,
+      syncIntentVisibility
     };
   })();
 
@@ -3518,6 +3814,11 @@
    * 8. INITIALISATION & PIPELINE DE RÉVÉLATION
    * ========================================================================= */
   StorageManager.loadAll();
+  UIController.syncPresetPills();
+  window.addEventListener("storage", StorageManager.syncFromStorageEvent);
+  document.addEventListener("fullscreenchange", () => {
+    if (TypographyEngine.isReady()) TypographyEngine.fit(true);
+  });
 
   const unlockAudioOnGesture = () => {
     AudioEngine.getCtx();
@@ -3586,8 +3887,8 @@
   TypographyEngine.getMeasureEl();
   const fontLoads = (document.fonts && document.fonts.load)
     ? Promise.allSettled([
-        document.fonts.load('100 100px "Google Sans Flex"', "0123456789:"),
-        document.fonts.load('300 100px "Google Sans Flex"', "0123456789:")
+        document.fonts.load('100 100px "Google Sans Flex"', "0123456789:-"),
+        document.fonts.load('300 100px "Google Sans Flex"', "0123456789:-")
       ])
     : Promise.resolve();
 
