@@ -1,65 +1,45 @@
 <div align="center">
-  <img src="icons/icon.svg" alt="Pomodoro Ultimate Logo" width="88" height="88" />
+  <img src="icons/icon.svg" alt="Pomodoro Ultimate" width="80" height="80" />
   <h1>Pomodoro Ultimate</h1>
+  <p>Offline-first Pomodoro timer with variable typography and synthesized Web Audio.</p>
+  <p><a href="https://TON-LIEN.pages.dev"><strong>Open App</strong></a></p>
   <p>
-    <strong>A tactile, distraction-free, offline-first Pomodoro timer built with kinetic variable typography and procedural Web Audio.</strong>
-  </p>
-
-  <p>
-    <a href="https://TON-LIEN-ICI.pages.dev"><strong>Launch Live App →</strong></a>
-  </p>
-
-  <p>
-    <img src="https://img.shields.io/badge/PWA-Offline--First-000000?style=flat-square" alt="PWA Offline-First" />
-    <img src="https://img.shields.io/badge/Dependencies-Zero-1c1c1e?style=flat-square" alt="Zero Dependencies" />
+    <img src="https://img.shields.io/badge/PWA-Offline-000000?style=flat-square" alt="PWA Offline" />
+    <img src="https://img.shields.io/badge/Dependencies-None-1c1c1e?style=flat-square" alt="No Dependencies" />
     <img src="https://img.shields.io/badge/Audio-Web_Audio_API-1c1c1e?style=flat-square" alt="Web Audio API" />
     <img src="https://img.shields.io/badge/License-PolyForm_Noncommercial_1.0-1c1c1e?style=flat-square" alt="License" />
   </p>
 </div>
 
-<br />
+<p align="center">
+  <img src="assets/preview-focus.png" alt="Focus mode" width="100%" />
+</p>
 
-<div align="center">
-  <img src="assets/preview-focus.png" alt="Pomodoro Ultimate — Focus Mode" width="100%" />
-</div>
-
----
-
-### Visual Overview
-
-| Nature Break (Luminous Text Mask) | Minimalist Settings & Controls |
+| Break mode | Settings |
 | :---: | :---: |
-| <img src="assets/preview-break.png" alt="Nature Break Mode" width="100%" /> | <img src="assets/preview-settings.png" alt="Settings & Credits" width="100%" /> |
-| *Blurred landscape backdrop (+33% brightness) clipped inside the timer digits.* | *Hidden top pill revealing audio, duration, stats, and credits on hover.* |
+| <img src="assets/preview-break.png" alt="Break mode" width="100%" /> | <img src="assets/preview-settings.png" alt="Settings" width="100%" /> |
 
----
+### Features
 
-### Why Pomodoro Ultimate?
+- **Variable typography:** Google Sans Flex animates weight, width, and roundness between running and paused states.
+- **Procedural audio:** Brown noise and watch tick generated in real time via the Web Audio API (no external audio files).
+- **Hold to pause:** Hold for 3 seconds to pause (1 second to resume) to avoid accidental stops.
+- **Hidden controls:** Settings appear only when hovering or tapping the top pill.
+- **Live favicon:** The tab icon displays remaining session time as a pie chart.
+- **Offline and local:** Installable PWA with Service Worker caching; daily and 7-day stats stay in local storage.
 
-- **Kinetic Variable Typography** — Powered by *Google Sans Flex*, the timer continuously interpolates weight (`wght`), width (`wdth`), and roundness (`ROND`) so the digits physically breathe between active focus and paused states.
-- **Synthesized Web Audio Engine** — Real-time procedural **brown noise** generator and mechanical **watch tick** synthesized directly via the Web Audio API. Zero audio files to download.
-- **Intentional Friction** — Holding for **3 seconds** to pause (and **1 second** to resume) prevents accidental interruptions, while all settings stay hidden until you hover the top pill.
-- **Dynamic Live Favicon** — The browser tab icon updates in real time as a minimal white pie chart tracking your remaining session.
-- **100% Offline & Private** — Installable as a native-like PWA on desktop and mobile via Service Worker caching. Daily and 7-day focus stats stay strictly on your device.
+### Controls
 
----
-
-### Controls & Shortcuts
-
-| Action | Mouse / Touch | Keyboard |
+| Action | Pointer / Touch | Keyboard |
 | :--- | :--- | :--- |
-| **Start session** | Click timer | `Space` |
-| **Pause / Resume** | Hold timer (`3s` / `1s`) | Hold `Space` (`3s` / `1s`) |
-| **Adjust volume** | Scroll wheel | — |
-| **Mute / Unmute** | Settings slider | `M` |
-| **Toggle brown noise** | Settings switch | `N` |
-| **Open / Close settings** | Hover or tap top pill | `Esc` |
+| **Start** | Click timer | `Space` |
+| **Pause / Resume** | Hold `3s` / `1s` | Hold `Space` (`3s` / `1s`) |
+| **Volume** | Scroll wheel | Settings slider |
+| **Mute** | Settings slider | `M` |
+| **Brown noise** | Settings switch | `N` |
+| **Settings** | Hover or tap top pill | `Esc` |
 
----
-
-### Run Locally
-
-No build tools, bundlers, or package managers required.
+### Run locally
 
 ```bash
 git clone [https://github.com/TON-PSEUDO/Pomodoro-Ultimate.git](https://github.com/TON-PSEUDO/Pomodoro-Ultimate.git)
