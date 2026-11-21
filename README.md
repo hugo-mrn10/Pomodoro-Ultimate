@@ -1,14 +1,14 @@
 <div align="center">
   <img src="icons/icon.svg" alt="Pomodoro Ultimate" width="84" height="84" />
   <h1>Pomodoro Ultimate</h1>
-  <p>Minimalist, offline-first Pomodoro timer with kinetic variable typography and procedural Web Audio.</p>
+  <p>Minimalist, offline-first Pomodoro timer with variable typography and procedural Web Audio.</p>
 
   <p>
-    <a href="https://pomodoro-ultimate.hugo-maurin-zh.workers.dev/">
+    <a href="https://hugo-maurin-zh.github.io/Pomodoro-Ultimate/">
       <img src="https://img.shields.io/badge/Launch_App-%E2%86%97-ffffff?style=for-the-badge" alt="Launch App" />
     </a>
   </p>
-  <p><a href="https://pomodoro-ultimate.hugo-maurin-zh.workers.dev/">pomodoro-ultimate.hugo-maurin-zh.workers.dev</a></p>
+  <p><a href="https://hugo-maurin-zh.github.io/Pomodoro-Ultimate/">hugo-maurin-zh.github.io/Pomodoro-Ultimate</a></p>
 
   <p>
     <img src="https://img.shields.io/badge/PWA-Offline--First-000000?style=flat-square" alt="PWA Offline" />
