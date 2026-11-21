@@ -65,7 +65,16 @@
     --hairline-border: rgba(255, 255, 255, 0.16);
   }
 
+  html {
+    -webkit-text-size-adjust: none;
+    -moz-text-size-adjust: none;
+    text-size-adjust: none;
+  }
+
   html, body {
+    position: fixed;
+    inset: 0;
+    width: 100%;
     height: 100%;
     margin: 0;
     background: #000;
@@ -114,7 +123,6 @@
   /* ---------- Timer unifié (Google Sans Flex + remplissage photo continu) ---------- */
   #time {
     display: inline-block;
-    contain: layout style;
     white-space: nowrap;
     line-height: 1;
     font-family: "Google Sans Flex", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
@@ -2274,6 +2282,26 @@
     let isFitted      = false;
     let stateAnimRaf  = null;
 
+    function getViewportSize() {
+      const bodyRect = document.body ? document.body.getBoundingClientRect() : null;
+      const vw = Math.min(
+        (bodyRect && bodyRect.width) || Infinity,
+        document.documentElement.clientWidth || Infinity,
+        (window.visualViewport && window.visualViewport.width) || Infinity,
+        window.innerWidth || Infinity
+      );
+      const vh = Math.min(
+        (bodyRect && bodyRect.height) || Infinity,
+        document.documentElement.clientHeight || Infinity,
+        (window.visualViewport && window.visualViewport.height) || Infinity,
+        window.innerHeight || Infinity
+      );
+      return {
+        vw: Number.isFinite(vw) ? vw : 0,
+        vh: Number.isFinite(vh) ? vh : 0
+      };
+    }
+
     function getMeasureEl() {
       if (measureEl && measureEl.isConnected) return measureEl;
       measureEl = document.createElement("span");
@@ -2314,12 +2342,11 @@
     }
 
     function computeFitForState(targetWght, targetRond) {
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
+      const { vw, vh } = getViewportSize();
       if (!vw || !vh) return null;
 
       const text = DOM.el.textContent || "25:00";
-      const cacheKey = `${vw}x${vh}|${text.length}|${targetWght}|${targetRond}`;
+      const cacheKey = `${Math.round(vw)}x${Math.round(vh)}|${text.length}|${targetWght}|${targetRond}`;
       const cached = fitCache.get(cacheKey);
       if (cached) return cached;
 
@@ -2332,28 +2359,28 @@
 
       const mEl = getMeasureEl();
       mEl.textContent = text;
-      mEl.style.fontSize = "1000px";
+      mEl.style.fontSize = "250px";
 
-      // Vérifier que l'axe variable "wdth" est bien actif avant la recherche binaire
       mEl.style.fontVariationSettings = `"wght" ${targetWght}, "wdth" ${WDTH_MIN}, "opsz" 144, "ROND" ${targetRond}`;
-      const wMin = mEl.getBoundingClientRect().width;
+      const wMin = mEl.getBoundingClientRect().width * 4;
       mEl.style.fontVariationSettings = `"wght" ${targetWght}, "wdth" ${WDTH_MAX}, "opsz" 144, "ROND" ${targetRond}`;
-      const wMax = mEl.getBoundingClientRect().width;
+      const wMax = mEl.getBoundingClientRect().width * 4;
 
-      if (!wMin || !wMax || wMax <= wMin * 1.2) {
-        const refW = wMax || 2750;
+      if (!wMin || !wMax || wMax <= wMin * 1.15) {
+        const refW = Math.max(wMin || 0, wMax || 0, 2850);
         const fs = Math.min((maxW * 1000) / refW, (maxH * 1000) / (1000 * inkHRatio));
         if (!recheckFontRaf) {
           recheckFontRaf = requestAnimationFrame(() => {
             recheckFontRaf = null;
-            if (isFitted) fit();
+            if (isFitted) fit(true);
           });
         }
-        return { wdth: 100, fs, shift: inkShiftRatio * fs };
+        return { wdth: 100, fs, shift: inkShiftRatio * fs, maxW };
       }
 
       let bestW = WDTH_MIN;
       let bestFs = 0;
+      let bestInkW = wMin;
       let bestDiff = Infinity;
       let lo = WDTH_MIN;
       let hi = WDTH_MAX;
@@ -2361,7 +2388,7 @@
       for (let i = 0; i < 16; i++) {
         const mid = (lo + hi) / 2;
         mEl.style.fontVariationSettings = `"wght" ${targetWght}, "wdth" ${mid.toFixed(2)}, "opsz" 144, "ROND" ${targetRond}`;
-        const boxW = mEl.getBoundingClientRect().width;
+        const boxW = mEl.getBoundingClientRect().width * 4;
         if (!boxW) { lo = mid; continue; }
 
         const inkW = boxW;
@@ -2379,16 +2406,20 @@
           bestDiff = Math.abs(diffX - diffY);
           bestW = mid;
           bestFs = fs;
+          bestInkW = inkW;
         }
         if (diffX > diffY) lo = mid;
         else               hi = mid;
       }
 
       if (!bestFs) return null;
+      bestFs = Math.min(bestFs, (maxW * 1000) / bestInkW);
+
       const result = {
         wdth: bestW,
         fs: bestFs,
-        shift: inkShiftRatio * bestFs
+        shift: inkShiftRatio * bestFs,
+        maxW
       };
       if (fitCache.size > 32) fitCache.clear();
       fitCache.set(cacheKey, result);
@@ -2398,6 +2429,18 @@
     function applyVariation() {
       DOM.el.style.fontVariationSettings =
         `"wght" ${currentWght.toFixed(1)}, "wdth" ${currentWdth.toFixed(2)}, "opsz" 144, "ROND" ${currentRond.toFixed(1)}`;
+    }
+
+    function clampRenderedBounds(maxW) {
+      if (!maxW || !DOM.el) return;
+      const rect = DOM.el.getBoundingClientRect();
+      if (rect.width > maxW && rect.width > 0) {
+        const ratio = (maxW / rect.width) * 0.985;
+        currentFs *= ratio;
+        currentShift = inkShiftRatio * currentFs;
+        DOM.el.style.fontSize = currentFs.toFixed(2) + "px";
+        DOM.el.style.transform = `translateY(${currentShift.toFixed(2)}px)`;
+      }
     }
 
     function cancelAnimation() {
@@ -2426,6 +2469,7 @@
       DOM.el.style.lineHeight = "1";
       DOM.el.style.transform  = `translateY(${currentShift.toFixed(2)}px)`;
       applyVariation();
+      clampRenderedBounds(res.maxW);
       BreakBackgroundManager.syncGeometry();
       isFitted = true;
       return true;
@@ -2479,6 +2523,7 @@
           DOM.el.style.fontSize  = endFs.toFixed(2) + "px";
           DOM.el.style.transform = `translateY(${endShift.toFixed(2)}px)`;
           applyVariation();
+          clampRenderedBounds(targetFit.maxW);
           BreakBackgroundManager.syncGeometry();
           return;
         }
@@ -3379,10 +3424,32 @@
   });
 
   if (typeof ResizeObserver !== "undefined") {
-    new ResizeObserver(() => {
-      if (TypographyEngine.isReady()) TypographyEngine.fit();
-    }).observe(document.documentElement);
+    let innerRefit = false;
+    const ro = new ResizeObserver(() => {
+      if (innerRefit || !TypographyEngine.isReady()) return;
+      innerRefit = true;
+      TypographyEngine.fit(true);
+      requestAnimationFrame(() => { innerRefit = false; });
+    });
+    ro.observe(document.documentElement);
+    ro.observe(DOM.el);
   }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", () => {
+      if (TypographyEngine.isReady()) TypographyEngine.fit(true);
+    }, { passive: true });
+  }
+  window.addEventListener("orientationchange", () => {
+    setTimeout(() => {
+      if (TypographyEngine.isReady()) TypographyEngine.fit(true);
+    }, 120);
+  });
+  window.addEventListener("pageshow", () => {
+    if (TypographyEngine.isReady()) TypographyEngine.fit(true);
+  });
+  setTimeout(() => {
+    if (TypographyEngine.isReady()) TypographyEngine.fit(true);
+  }, 150);
 
   let revealed = false;
   let revealAttempts = 0;
