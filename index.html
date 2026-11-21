@@ -1554,7 +1554,7 @@
     }
 
     async function playWatchTick(preview = false) {
-      if (!preview && !isSwitchActive(DOM.tickToggle)) return;
+      if (!preview && (!isSwitchActive(DOM.tickToggle) || !AppState.isFocus())) return;
       const ctx = getCtx();
       if (!ctx || !masterGain) return;
 
@@ -1562,7 +1562,7 @@
         try { await ctx.resume(); } catch (e) { return; }
       }
       if (ctx.state !== "running") return;
-      if (!preview && !isSwitchActive(DOM.tickToggle)) return;
+      if (!preview && (!isSwitchActive(DOM.tickToggle) || !AppState.isFocus())) return;
 
       const now = ctx.currentTime;
       if (!watchTickNoiseBuffer) {
@@ -2816,7 +2816,7 @@
       const { immediateFit = false } = opts;
       const text = fmt(AppState.remaining);
 
-      if (AppState.running && lastRenderedTimerIndex === AppState.idx &&
+      if (AppState.running && AppState.isFocus() && lastRenderedTimerIndex === AppState.idx &&
           lastRenderedTimeText !== null && text !== lastRenderedTimeText) {
         AudioEngine.playWatchTick();
       }
