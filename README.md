@@ -4,11 +4,11 @@
   <p>Minimalist, offline-first Pomodoro timer with variable typography and procedural Web Audio.</p>
 
   <p>
-    <a href="https://hugo-maurin-zh.github.io/Pomodoro-Ultimate/">
+    <a href="https://hugo-mrn10.github.io/Pomodoro-Ultimate/">
       <img src="https://img.shields.io/badge/Launch_App-%E2%86%97-ffffff?style=for-the-badge" alt="Launch App" />
     </a>
   </p>
-  <p><a href="https://hugo-maurin-zh.github.io/Pomodoro-Ultimate/">hugo-maurin-zh.github.io/Pomodoro-Ultimate</a></p>
+  <p><a href="https://hugo-mrn10.github.io/Pomodoro-Ultimate/">hugo-mrn10.github.io/Pomodoro-Ultimate</a></p>
 
   <p>
     <img src="https://img.shields.io/badge/PWA-Offline--First-000000?style=flat-square" alt="PWA Offline" />
@@ -48,6 +48,6 @@
 ### Run locally
 
 ```bash
-git clone [https://github.com/hugo-maurin-zh/Pomodoro-Ultimate.git](https://github.com/hugo-maurin-zh/Pomodoro-Ultimate.git)
+git clone [https://github.com/hugo-mrn10/Pomodoro-Ultimate.git](https://github.com/hugo-mrn10/Pomodoro-Ultimate.git)
 cd Pomodoro-Ultimate
 python3 -m http.server 8080
