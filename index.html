@@ -1291,12 +1291,12 @@
         stageStarted: AppState.stageStarted,
         savedAt: Date.now()
       });
-      try {
-        localStorage.setItem("pomodoro-session", payload);
-      } catch (e) {}
-      try {
-        window.name = "POMODORO_SESSION:" + payload;
-      } catch (e) {}
+      const commit = () => {
+        try { localStorage.setItem("pomodoro-session", payload); } catch (e) {}
+        try { window.name = "POMODORO_SESSION:" + payload; } catch (e) {}
+      };
+      if (force) commit();
+      else setTimeout(commit, 0);
     }
 
     function markBgSeen(url) {
@@ -2855,6 +2855,7 @@
       if (lastRunning !== AppState.running) {
         lastRunning = AppState.running;
         if (timerWorker) timerWorker.postMessage(AppState.running ? "start" : "stop");
+        syncDisplayLoop();
         document.body.classList.toggle("running", AppState.running);
         if (immediateFit) TypographyEngine.fit();
         else              TypographyEngine.transitionToRunningState(AppState.running);
@@ -2947,24 +2948,42 @@
       render();
     }
 
+    let displayRaf = null;
+    function syncDisplayLoop() {
+      if (AppState.running && document.visibilityState === "visible") {
+        if (displayRaf === null) {
+          const loop = () => {
+            if (!AppState.running || document.visibilityState !== "visible") {
+              displayRaf = null;
+              return;
+            }
+            tick();
+            displayRaf = requestAnimationFrame(loop);
+          };
+          displayRaf = requestAnimationFrame(loop);
+        }
+      } else if (displayRaf !== null) {
+        cancelAnimationFrame(displayRaf);
+        displayRaf = null;
+      }
+    }
+    document.addEventListener("visibilitychange", () => {
+      if (AppState.running) tick();
+      syncDisplayLoop();
+    });
+
     let timerWorker = null;
     try {
       const workerCode = `
         let timerId = null;
-        function scheduleNext() {
-          const delay = 1000 - (Date.now() % 1000) + 4;
-          timerId = setTimeout(() => {
-            self.postMessage("tick");
-            scheduleNext();
-          }, delay);
-        }
         self.onmessage = function(e) {
           if (e.data === "start") {
-            if (timerId !== null) clearTimeout(timerId);
-            scheduleNext();
+            if (timerId !== null) clearInterval(timerId);
+            self.postMessage("tick");
+            timerId = setInterval(() => self.postMessage("tick"), 100);
           } else if (e.data === "stop") {
             if (timerId !== null) {
-              clearTimeout(timerId);
+              clearInterval(timerId);
               timerId = null;
             }
           }
@@ -2974,7 +2993,7 @@
       timerWorker = new Worker(URL.createObjectURL(blob));
       timerWorker.onmessage = () => tick();
     } catch (e) {
-      setInterval(tick, 250);
+      setInterval(tick, 100);
     }
 
     function resetInternalTracking() {
