@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Pomodoro Ultimate">
 <link rel="manifest" href="manifest.webmanifest?v=1795264952">
-<link id="dynamic-favicon" rel="icon" type="image/png" href="icons/favicon-32.png">
+<link id="dynamic-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2728%27 fill=%27%23ff453a%27/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png?v=1795264952">
 <title>Pomodoro Ultimate</title>
 <link rel="preload" href="fonts/font-02.woff2" as="font" type="font/woff2" crossorigin>
@@ -1640,7 +1640,7 @@
     remaining: DEFAULT_SEQUENCE[0] * 60,
     running: false,
     stageStarted: false,
-    sessionCompleted: false,
+    afterBreak: false,
     endAt: 0,
     overtime: false,
     overtimeStartAt: 0,
@@ -1793,6 +1793,7 @@
         running: AppState.running,
         stageStarted: AppState.stageStarted,
         overtime: AppState.overtime,
+        afterBreak: AppState.afterBreak,
         overtimeSec: Number(AppState.getOvertimeSec().toFixed(2)),
         savedAt: Date.now()
       });
@@ -1922,14 +1923,18 @@
             AppState.remaining = left;
             AppState.running = wasRunning;
             AppState.stageStarted = wasRunning || (session.stageStarted === true) || (left < AppState.sequence[session.idx]);
+            AppState.afterBreak = !AppState.stageStarted && AppState.idx === 0 && session.afterBreak === true;
             if (wasRunning) {
               AppState.endAt = performance.now() + left * 1000;
             }
           } else {
+            const prevWasBreak = (session.idx % 2) === 1;
             AppState.idx = (session.idx + 1) % AppState.sequence.length;
             AppState.remaining = AppState.sequence[AppState.idx];
             AppState.running = false;
             AppState.stageStarted = false;
+            AppState.afterBreak = prevWasBreak && AppState.idx === 0;
+      AppState.afterBreak = false;
           }
         }
       }
@@ -3510,54 +3515,7 @@
     return !darkModeQuery || darkModeQuery.matches;
   }
 
-  function updateFavicon(progressPct) {
-    if (!faviconCtx) return;
-    const ratio = Math.max(0, Math.min(1, progressPct / 100));
-    const step = Math.round(ratio * 120);
-    const dark = isDarkTheme();
-    if (AppState.sessionCompleted && !AppState.running) {
-        const doneKey = "session-completed";
-        if (lastFaviconKey === doneKey) return;
-        lastFaviconKey = doneKey;
-        const size = faviconCanvas.width || 64;
-        const cx = size / 2;
-        const r = cx - 2;
-        faviconCtx.clearRect(0, 0, size, size);
-        faviconCtx.beginPath();
-        faviconCtx.arc(cx, cx, r, 0, Math.PI * 2);
-        faviconCtx.fillStyle = "#ffd60a";
-        faviconCtx.fill();
-        faviconLink.href = faviconCanvas.toDataURL("image/png");
-        return;
-      }
-
-      const key = `${step}-${AppState.running ? 1 : 0}-${dark ? 1 : 0}`;
-    if (key === lastFaviconKey) return;
-    lastFaviconKey = key;
-
-    const cx = 32;
-    const cy = 32;
-    const r = 30;
-    const activeColor = dark ? "#ffffff" : "#1c1c1e";
-    const pausedColor = dark ? "rgba(255, 255, 255, 0.78)" : "rgba(28, 28, 30, 0.72)";
-    faviconCtx.clearRect(0, 0, 64, 64);
-
-    if (ratio > 0) {
-      faviconCtx.beginPath();
-      if (ratio < 0.999) faviconCtx.moveTo(cx, cy);
-      faviconCtx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + ratio * Math.PI * 2);
-      if (ratio < 0.999) faviconCtx.closePath();
-      faviconCtx.fillStyle = AppState.running ? activeColor : pausedColor;
-      faviconCtx.fill();
-    } else {
-      faviconCtx.beginPath();
-      faviconCtx.moveTo(cx, cy);
-      faviconCtx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + (2 / 3) * Math.PI * 2);
-      faviconCtx.closePath();
-      faviconCtx.fillStyle = pausedColor;
-      faviconCtx.fill();
-    }
-
+  function commitFaviconCanvas() {
     const dataUrl = faviconCanvas.toDataURL("image/png");
     const nextLink = document.createElement("link");
     nextLink.id = "dynamic-favicon";
@@ -3570,6 +3528,65 @@
       document.head.appendChild(nextLink);
     }
     faviconLink = nextLink;
+  }
+
+  function drawStatusDot(color) {
+    faviconCtx.clearRect(0, 0, 64, 64);
+    faviconCtx.beginPath();
+    faviconCtx.arc(32, 32, 28, 0, Math.PI * 2);
+    faviconCtx.fillStyle = color;
+    faviconCtx.fill();
+    commitFaviconCanvas();
+  }
+
+  function updateFavicon(progressPct) {
+    if (!faviconCtx) return;
+    const dark = isDarkTheme();
+    // Avant le démarrage de l'étape en cours : point d'état
+    if (!AppState.running && !AppState.stageStarted) {
+      if (AppState.isBreak()) {
+        // Début d'une pause (= focus terminé) -> vert
+        if (lastFaviconKey === "idle-break") return;
+        lastFaviconKey = "idle-break";
+        drawStatusDot("#30d158");
+        return;
+      }
+      if (AppState.idx > 0 || AppState.afterBreak) {
+        // Début d'un focus après une pause (hors démarrage initial) -> jaune
+        if (lastFaviconKey === "idle-focus-next") return;
+        lastFaviconKey = "idle-focus-next";
+        drawStatusDot("#ffd60a");
+        return;
+      }
+      // Démarrage initial / après Reset -> rouge
+      if (lastFaviconKey === "idle-initial") return;
+      lastFaviconKey = "idle-initial";
+      drawStatusDot("#ff453a");
+      return;
+    }
+
+    // 3. Session en cours ou en pause -> camembert de progression
+    const ratio = Math.max(0, Math.min(1, progressPct / 100));
+    const step = Math.round(ratio * 120);
+    const key = `${step}-${AppState.running ? 1 : 0}-${dark ? 1 : 0}`;
+    if (key === lastFaviconKey) return;
+    lastFaviconKey = key;
+
+    const cx = 32;
+    const cy = 32;
+    const r = 30;
+    const activeColor = dark ? "#ffffff" : "#1c1c1e";
+    const pausedColor = dark ? "rgba(255, 255, 255, 0.78)" : "rgba(28, 28, 30, 0.72)";
+    const drawRatio = Math.max(0.015, ratio);
+
+    faviconCtx.clearRect(0, 0, 64, 64);
+    faviconCtx.beginPath();
+    if (drawRatio < 0.999) faviconCtx.moveTo(cx, cy);
+    faviconCtx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + drawRatio * Math.PI * 2);
+    if (drawRatio < 0.999) faviconCtx.closePath();
+    faviconCtx.fillStyle = AppState.running ? activeColor : pausedColor;
+    faviconCtx.fill();
+    commitFaviconCanvas();
   }
 
     if (darkModeQuery) {
@@ -3726,12 +3743,13 @@
     }
 
     function finishOvertimeToBreak() {
-      AppState.sessionCompleted = false;
+      AppState.afterBreak = false;
       if (!AppState.overtime) return;
       flushOvertimeCredit();
       AudioEngine.playSound("start");
 
       const nextIdx = (AppState.idx + 1) % AppState.sequence.length;
+      AppState.afterBreak = !wasFocus && nextIdx === 0;
       const nextIsBreak = (nextIdx % 2) === 1;
       if (!(nextIsBreak && isSwitchActive(DOM.bgToggle) && BreakBackgroundManager.promotePreloadedIfAvailable())) {
         BreakBackgroundManager.clear(nextIsBreak);
@@ -3801,7 +3819,7 @@
     }
 
     function toggle() {
-      AppState.sessionCompleted = false;
+      AppState.afterBreak = false;
       AppState.running = !AppState.running;
       AppState.stageStarted = true;
       if (AppState.running) {
@@ -3814,7 +3832,6 @@
     }
 
     function advance(complete) {
-      AppState.sessionCompleted = Boolean(complete);
       flushOvertimeCredit();
       const wasFocus = AppState.isFocus();
 
@@ -3860,7 +3877,7 @@
     }
 
     function reset() {
-      AppState.sessionCompleted = false;
+      AppState.afterBreak = false;
       flushOvertimeCredit();
       AppState.running = false;
       AppState.stageStarted = false;
