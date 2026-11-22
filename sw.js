@@ -1,4 +1,4 @@
-const CACHE_NAME = "pomodoro-ultimate-v1795286966";
+const CACHE_NAME = "pomodoro-ultimate-v1795342245";
 const REMOTE_BG_CACHE = "pomodoro-remote-bg-v1";
 const MAX_REMOTE_BGS = 8;
 
@@ -8,7 +8,7 @@ const STATIC_ASSETS = [
   "./manifest.webmanifest",
   "./fonts/font-02.woff2",
   "./fonts/font-11.woff2",
-  "./icons/icon-192.png",
+  "./icons/icon-192.png", 'icons/logo.svg',
   "./icons/icon-512.png",
   "./icons/apple-touch-icon.png"
 ];

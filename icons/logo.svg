@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="pie-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.15"/>
+    </linearGradient>
+    <linearGradient id="glass-rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.32"/>
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.04"/>
+    </linearGradient>
+    <clipPath id="dial-clip">
+      <circle cx="256" cy="256" r="164"/>
+    </clipPath>
+  </defs>
+
+  <!-- Conteneur circulaire sur fond transparent -->
+  <circle cx="256" cy="256" r="240" fill="#000000"/>
+  <circle cx="256" cy="256" r="240" fill="url(#bg-grad)"/>
+
+  <!-- Camembert 2/3 (12h -> 8h, r=164) -->
+  <path d="M 256 256 L 256 92 A 164 164 0 1 1 113.97 338 Z" fill="#FFFFFF"/>
+  <path d="M 256 256 L 256 92 A 164 164 0 1 1 113.97 338 Z" fill="url(#pie-grad)"/>
+
+  <!-- Outline du cadran Haut (8h -> 12h) : r = 164 - 14.5/2 = 156.75 pour ne jamais dépasser r=164 -->
+  <g clip-path="url(#dial-clip)">
+    <path d="M 120.25 334.38 A 156.75 156.75 0 0 1 256 99.25"
+          fill="none"
+          stroke="#FFFFFF"
+          stroke-opacity="0.06"
+          stroke-width="14.5"
+          stroke-linecap="butt"/>
+  </g>
+
+  <!-- Bordure Glass Rim proportionnelle à la taille de l'icône -->
+  <circle cx="256" cy="256" r="237" fill="none" stroke="url(#glass-rim)" stroke-width="6"/>
+</svg>
