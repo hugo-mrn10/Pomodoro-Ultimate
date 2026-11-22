@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="icons/logo.svg" alt="Pomodoro Ultimate" width="84" height="84" />
+  <img src="icons/logo.svg" alt="Pomodoro Ultimate" width="120" height="120" />
   <h1>Pomodoro Ultimate</h1>
   <p>Minimalist, offline-first Pomodoro timer with variable typography and procedural Web Audio.</p>
 
