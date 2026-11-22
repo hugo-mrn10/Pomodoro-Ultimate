@@ -60,6 +60,7 @@
 <style>
   :root {
     --ease-apple: cubic-bezier(0.22, 1, 0.36, 1);
+    --break-fade: 0.95s cubic-bezier(0.32, 0.72, 0, 1);
     --surface-material: rgba(28, 28, 30, 0.84);
     --hairline-border: rgba(255, 255, 255, 0.16);
   }
@@ -88,7 +89,7 @@
     background-size: cover;
     background-position: center;
     opacity: 0;
-    transition: opacity 0.8s var(--ease-apple);
+    transition: opacity var(--break-fade);
     z-index: 0;
     pointer-events: none;
   }
@@ -102,7 +103,7 @@
     inset: 0;
     background: #000;
     opacity: 0;
-    transition: opacity 0.8s var(--ease-apple);
+    transition: opacity var(--break-fade);
     z-index: 1;
     pointer-events: none;
   }
@@ -138,8 +139,8 @@
     background-repeat: no-repeat;
     background-position: center center;
     transition:
-      opacity 0.8s var(--ease-apple),
-      color 0.8s var(--ease-apple);
+      opacity var(--break-fade),
+      color var(--break-fade);
   }
   body.ready #time { opacity: 0.75; }
   body.ready.running #time { opacity: 1; }
@@ -1229,6 +1230,37 @@
     color: rgba(255, 255, 255, 0.38);
     display: inline-flex;
   }
+  .hig-row[hidden] {
+    display: none;
+  }
+  .hig-custom-name {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.56);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .hig-inline-btn {
+    flex: 0 0 auto;
+    padding: 4px 10px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.12s ease;
+  }
+  .hig-inline-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+  }
+  .hig-inline-btn:active {
+    transform: scale(0.96);
+  }
 
   /* Statistiques discrètes + boutons d'action compacts */
   .hig-footer-stats {
@@ -1438,6 +1470,7 @@
             <option value="mix">All (Landscapes)</option>
             <option value="wikimedia">Wikimedia</option>
             <option value="bing-nature">Bing Archive</option>
+            <option value="custom">Custom image…</option>
           </select>
           <span class="hig-select-chevron" aria-hidden="true">
             <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -1445,6 +1478,11 @@
             </svg>
           </span>
         </div>
+      </div>
+      <div class="hig-row" id="bg-custom-row" hidden>
+        <span id="bg-custom-name" class="hig-custom-name">No image selected</span>
+        <button type="button" id="bg-custom-btn" class="hig-inline-btn">Choose…</button>
+        <input type="file" id="bg-custom-input" accept="image/*" hidden>
       </div>
     </div>
 
@@ -1562,6 +1600,10 @@
     presetPills: Array.from(document.querySelectorAll(".preset-pill")),
     bgToggle: document.getElementById("bg-toggle"),
     bgSourceSelect: document.getElementById("bg-source"),
+    bgCustomRow: document.getElementById("bg-custom-row"),
+    bgCustomName: document.getElementById("bg-custom-name"),
+    bgCustomBtn: document.getElementById("bg-custom-btn"),
+    bgCustomInput: document.getElementById("bg-custom-input"),
     focusInput: document.getElementById("focus-dur"),
     breakInput: document.getElementById("break-dur"),
     longBreakInput: document.getElementById("long-break-dur"),
@@ -1919,6 +1961,7 @@
           applyPrefsToUI(merged);
           UIController.syncPresetPills();
           UIController.syncIntentVisibility();
+          UIController.syncCustomBgRow();
           TimerController.render({ immediateFit: !AppState.running });
         } catch (err) {}
       } else if (e.key === "pomodoro-session") {
@@ -2635,7 +2678,127 @@
       }
     }
 
+    const CustomBgStore = (() => {
+      const DB_NAME = "pomodoro-custom-bg-db";
+      const STORE_NAME = "assets";
+      const KEY = "break-image";
+      let dbPromise = null;
+
+      function openDb() {
+        if (!("indexedDB" in window)) return Promise.resolve(null);
+        if (dbPromise) return dbPromise;
+        dbPromise = new Promise(resolve => {
+          try {
+            const req = indexedDB.open(DB_NAME, 1);
+            req.onupgradeneeded = () => {
+              const db = req.result;
+              if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME);
+              }
+            };
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => resolve(null);
+          } catch (e) {
+            resolve(null);
+          }
+        });
+        return dbPromise;
+      }
+
+      async function save(file) {
+        const db = await openDb();
+        if (!db) return false;
+        return new Promise(resolve => {
+          try {
+            const tx = db.transaction(STORE_NAME, "readwrite");
+            tx.objectStore(STORE_NAME).put({
+              blob: file,
+              name: file.name || "Custom image",
+              updatedAt: Date.now()
+            }, KEY);
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => resolve(false);
+          } catch (e) {
+            resolve(false);
+          }
+        });
+      }
+
+      async function load() {
+        const db = await openDb();
+        if (!db) return null;
+        return new Promise(resolve => {
+          try {
+            const tx = db.transaction(STORE_NAME, "readonly");
+            const req = tx.objectStore(STORE_NAME).get(KEY);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => resolve(null);
+          } catch (e) {
+            resolve(null);
+          }
+        });
+      }
+
+      async function clear() {
+        const db = await openDb();
+        if (!db) return;
+        return new Promise(resolve => {
+          try {
+            const tx = db.transaction(STORE_NAME, "readwrite");
+            tx.objectStore(STORE_NAME).delete(KEY);
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => resolve();
+          } catch (e) {
+            resolve();
+          }
+        });
+      }
+
+      return { save, load, clear };
+    })();
+
+    let currentCustomObjectUrl = "";
+
+    async function loadCustomBgItem() {
+      const record = await CustomBgStore.load();
+      if (!record || !record.blob) return null;
+      const nextUrl = URL.createObjectURL(record.blob);
+      if (currentCustomObjectUrl && currentCustomObjectUrl !== nextUrl) {
+        const prevUrl = currentCustomObjectUrl;
+        setTimeout(() => URL.revokeObjectURL(prevUrl), 2500);
+      }
+      currentCustomObjectUrl = nextUrl;
+      return {
+        url: nextUrl,
+        caption: formatLocationCaption(record.name || "Custom image"),
+        isLocal: true
+      };
+    }
+
+    async function saveCustomBgFile(file) {
+      if (!file) return false;
+      return await CustomBgStore.save(file);
+    }
+
+    async function getCustomBgMeta() {
+      const record = await CustomBgStore.load();
+      if (!record || !record.blob) return null;
+      return { name: record.name || "Custom image" };
+    }
+
+    async function clearCustomBg() {
+      await CustomBgStore.clear();
+      if (currentCustomObjectUrl) {
+        URL.revokeObjectURL(currentCustomObjectUrl);
+        currentCustomObjectUrl = "";
+      }
+    }
+
     async function resolveNextBgItem(source) {
+      if (source === "custom") {
+        const customItem = await loadCustomBgItem();
+        return customItem || pickLocalImage();
+      }
       if (!navigator.onLine) {
         if (source !== "local") {
           const cachedRemote = await pickCachedRemoteBgItem();
@@ -2729,6 +2892,22 @@
     let activeReqId = 0;
     let preloadReqId = 0;
     let revealRaf = null;
+    let clearCleanupTimer = null;
+    let isVisuallyRevealed = false;
+
+    function decodeUrl(url) {
+      if (!url) return Promise.resolve();
+      return new Promise(resolve => {
+        const probe = new Image();
+        probe.decoding = "async";
+        probe.onload = () => {
+          if (probe.decode) probe.decode().then(resolve, resolve);
+          else resolve();
+        };
+        probe.onerror = resolve;
+        probe.src = url;
+      });
+    }
 
     function syncGeometry() {
       if (!activeBg || !DOM.el.classList.contains("break-image-ready")) return;
@@ -2746,6 +2925,16 @@
     }
 
     function applyReadyBackground(bgObj) {
+      clearTimeout(clearCleanupTimer);
+      clearCleanupTimer = null;
+      cancelAnimationFrame(revealRaf);
+      revealRaf = null;
+      isVisuallyRevealed = false;
+
+      DOM.bgLayer.classList.remove("active");
+      if (DOM.bgVeil) DOM.bgVeil.style.opacity = "0";
+      DOM.el.classList.remove("break-image-revealed");
+
       activeBg = bgObj;
       DOM.bgLayer.style.backgroundImage = `url("${bgObj.url}")`;
       DOM.el.style.backgroundImage = `url("${bgObj.blurredUrl || bgObj.url}")`;
@@ -2753,16 +2942,31 @@
       syncGeometry();
     }
 
-    function setBreakPhotoRevealed(revealed) {
+    function syncVisualReveal(show) {
+      const shouldShow = Boolean(show && activeBg && activeBg.url);
+      if (shouldShow === isVisuallyRevealed) return;
+      isVisuallyRevealed = shouldShow;
       cancelAnimationFrame(revealRaf);
-      if (revealed && activeBg) {
+      revealRaf = null;
+
+      if (shouldShow) {
+        clearTimeout(clearCleanupTimer);
+        clearCleanupTimer = null;
         DOM.el.classList.add("break-image-ready");
         syncGeometry();
+        // Force le rendu initial (opacity: 0 + texte blanc) avant le fondu simultané
+        void DOM.bgLayer.offsetWidth;
         void DOM.el.offsetWidth;
         revealRaf = requestAnimationFrame(() => {
+          revealRaf = null;
+          if (!isVisuallyRevealed || !activeBg) return;
+          DOM.bgLayer.classList.add("active");
+          if (DOM.bgVeil) DOM.bgVeil.style.opacity = String(activeBg.veilOpacity);
           DOM.el.classList.add("break-image-revealed");
         });
       } else {
+        DOM.bgLayer.classList.remove("active");
+        if (DOM.bgVeil) DOM.bgVeil.style.opacity = "0";
         DOM.el.classList.remove("break-image-revealed");
       }
     }
@@ -2777,14 +2981,30 @@
       activeReqId++;
       isFetchingBg = false;
       activeBg = null;
-      cancelAnimationFrame(revealRaf);
       if (!keepPreload) clearPreload();
       DOM.bgCaptionEl.classList.remove("visible");
-      DOM.bgLayer.classList.remove("active");
-      if (DOM.bgVeil) DOM.bgVeil.style.opacity = "0";
-      DOM.el.classList.remove("break-image-revealed", "break-image-ready");
-      DOM.el.style.backgroundImage = "";
-      DOM.el.style.backgroundSize = "";
+
+      const hadVisual = isVisuallyRevealed || DOM.el.classList.contains("break-image-ready");
+      syncVisualReveal(false);
+
+      clearTimeout(clearCleanupTimer);
+      if (hadVisual && !prefersReducedMotion()) {
+        clearCleanupTimer = setTimeout(() => {
+          clearCleanupTimer = null;
+          if (!activeBg) {
+            DOM.el.classList.remove("break-image-ready");
+            DOM.el.style.backgroundImage = "";
+            DOM.el.style.backgroundSize = "";
+            DOM.bgLayer.style.backgroundImage = "";
+          }
+        }, 1000);
+      } else {
+        clearCleanupTimer = null;
+        DOM.el.classList.remove("break-image-ready");
+        DOM.el.style.backgroundImage = "";
+        DOM.el.style.backgroundSize = "";
+        DOM.bgLayer.style.backgroundImage = "";
+      }
     }
 
     function fetchValidBreakImage(source, isCancelled, attempt = 0) {
@@ -2810,13 +3030,17 @@
             }
 
             const contrast = computeAdaptiveContrast(img);
+            const blurredUrl = bakeBlurredBreakImage(img, contrast.textSlope) || img.currentSrc || url;
+            await decodeUrl(blurredUrl);
+            if (isCancelled()) { resolve(null); return; }
+
             const aspectRatio = (img.naturalWidth && img.naturalHeight)
               ? (img.naturalWidth / img.naturalHeight)
               : (16 / 9);
 
             resolve({
               url,
-              blurredUrl: bakeBlurredBreakImage(img, contrast.textSlope) || img.currentSrc || url,
+              blurredUrl,
               caption: caption || "",
               veilOpacity: contrast.veilOpacity,
               textSlope: contrast.textSlope,
@@ -2850,6 +3074,14 @@
           preloadedBg = res;
         }
       });
+    }
+
+    function ensurePreloaded() {
+      if (!isSwitchActive(DOM.bgToggle)) return;
+      if (preloadedBg || isPreloadingBg) return;
+      if (AppState.isBreak() && (activeBg || isFetchingBg)) return;
+      const source = DOM.bgSourceSelect ? DOM.bgSourceSelect.value : "auto";
+      startPreload(source);
     }
 
     function startLoad(source) {
@@ -2896,10 +3128,7 @@
 
       if (AppState.isFocus()) {
         if (activeBg || isFetchingBg) clear(true);
-        if (AppState.running && AppState.remaining <= 35 && !preloadedBg && !isPreloadingBg) {
-          const source = DOM.bgSourceSelect ? DOM.bgSourceSelect.value : "auto";
-          startPreload(source);
-        }
+        ensurePreloaded();
         return;
       }
 
@@ -2909,9 +3138,7 @@
       }
 
       const show = AppState.running && Boolean(activeBg && activeBg.url);
-      DOM.bgLayer.classList.toggle("active", show);
-      if (DOM.bgVeil) DOM.bgVeil.style.opacity = show ? String(activeBg.veilOpacity) : "0";
-      setBreakPhotoRevealed(show);
+      syncVisualReveal(show);
       syncCaptionVisibility();
     }
 
@@ -2920,6 +3147,7 @@
       const isBreakActive = AppState.isBreak() && isSwitchActive(DOM.bgToggle) && AppState.running;
       if (!isBreakActive || !activeBg) {
         clear(false);
+        ensurePreloaded();
         return false;
       }
       const source = DOM.bgSourceSelect ? DOM.bgSourceSelect.value : "auto";
@@ -2941,7 +3169,10 @@
       promotePreloadedIfAvailable,
       syncCaptionVisibility,
       hotSwapSource,
-      resetPools
+      resetPools,
+      saveCustomBgFile,
+      getCustomBgMeta,
+      clearCustomBg
     };
   })();
 
@@ -3105,6 +3336,12 @@
 
       if (!bestFs) return null;
       bestFs = Math.min(bestFs, (maxW * 1000) / bestInkW);
+      mEl.style.fontSize = bestFs.toFixed(2) + "px";
+      mEl.style.fontVariationSettings = `"wght" ${targetWght}, "wdth" ${bestW.toFixed(2)}, "opsz" 144, "ROND" ${targetRond}`;
+      const actualW = mEl.getBoundingClientRect().width;
+      if (actualW > maxW && actualW > 0) {
+        bestFs *= (maxW / actualW) * 0.995;
+      }
 
       const result = {
         wdth: bestW,
@@ -3190,20 +3427,22 @@
       const endFs    = targetFit.fs;
       const endShift = targetFit.shift;
 
-      const baseFs = startFs || endFs;
-      DOM.el.style.fontSize = baseFs.toFixed(2) + "px";
-
       const animMs = 620;
       const startTime = performance.now();
-      let lastRasterWght = -999;
+
       function step(now) {
         const t = Math.min(1, (now - startTime) / animMs);
         const eased = EASE_IN_OUT(t);
+
         currentWght  = startWght  + (targetWght - startWght)  * eased;
         currentRond  = startRond  + (targetRond - startRond)  * eased;
         currentWdth  = startWdth  + (endWdth    - startWdth)  * eased;
         currentFs    = startFs    + (endFs      - startFs)    * eased;
         currentShift = startShift + (endShift   - startShift) * eased;
+
+        DOM.el.style.fontSize  = currentFs.toFixed(2) + "px";
+        DOM.el.style.transform = `translateY(${currentShift.toFixed(2)}px)`;
+        applyVariation();
 
         if (t >= 1) {
           stateAnimRaf = null;
@@ -3220,12 +3459,6 @@
           return;
         }
 
-        const scale = baseFs > 0 ? (currentFs / baseFs) : 1;
-        DOM.el.style.transform = `translate3d(0, ${currentShift.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
-        if (Math.abs(currentWght - lastRasterWght) >= 8) {
-          lastRasterWght = currentWght;
-          applyVariation();
-        }
         stateAnimRaf = requestAnimationFrame(step);
       }
       stateAnimRaf = requestAnimationFrame(step);
@@ -4071,12 +4304,98 @@
       TimerController.render();
     });
 
-    DOM.bgSourceSelect.addEventListener("change", () => {
+    let lastValidBgSource = DOM.bgSourceSelect ? DOM.bgSourceSelect.value : "auto";
+    if (lastValidBgSource === "custom") lastValidBgSource = "auto";
+
+    async function syncCustomBgRow() {
+      if (!DOM.bgCustomRow || !DOM.bgSourceSelect) return;
+      const isCustom = DOM.bgSourceSelect.value === "custom";
+      DOM.bgCustomRow.hidden = !isCustom;
+      if (!isCustom) return;
+      const meta = await BreakBackgroundManager.getCustomBgMeta();
+      if (DOM.bgCustomName) {
+        DOM.bgCustomName.textContent = meta ? meta.name : "No image selected";
+      }
+      if (DOM.bgCustomBtn) {
+        DOM.bgCustomBtn.textContent = meta ? "Change…" : "Choose…";
+      }
+    }
+
+    function openCustomImagePicker() {
+      if (!DOM.bgCustomInput) return;
+      DOM.bgCustomInput.value = "";
+      DOM.bgCustomInput.click();
+    }
+
+    DOM.bgSourceSelect.addEventListener("change", async () => {
+      const val = DOM.bgSourceSelect.value;
+      if (val === "custom") {
+        await syncCustomBgRow();
+        const meta = await BreakBackgroundManager.getCustomBgMeta();
+        if (!meta) {
+          openCustomImagePicker();
+          return;
+        }
+        lastValidBgSource = "custom";
+        if (!BreakBackgroundManager.hotSwapSource()) {
+          TimerController.render();
+        }
+        StorageManager.savePrefs();
+        return;
+      }
+      lastValidBgSource = val;
+      await syncCustomBgRow();
       if (!BreakBackgroundManager.hotSwapSource()) {
         TimerController.render();
       }
       StorageManager.savePrefs();
     });
+
+    if (DOM.bgCustomBtn) {
+      DOM.bgCustomBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openCustomImagePicker();
+      });
+    }
+
+    if (DOM.bgCustomInput) {
+      DOM.bgCustomInput.addEventListener("cancel", async () => {
+        const meta = await BreakBackgroundManager.getCustomBgMeta();
+        if (!meta && DOM.bgSourceSelect.value === "custom") {
+          DOM.bgSourceSelect.value = lastValidBgSource;
+          await syncCustomBgRow();
+        }
+      });
+
+      DOM.bgCustomInput.addEventListener("change", async () => {
+        const file = DOM.bgCustomInput.files && DOM.bgCustomInput.files[0];
+        if (!file) {
+          const meta = await BreakBackgroundManager.getCustomBgMeta();
+          if (!meta && DOM.bgSourceSelect.value === "custom") {
+            DOM.bgSourceSelect.value = lastValidBgSource;
+            await syncCustomBgRow();
+          }
+          return;
+        }
+        if (!file.type.startsWith("image/")) {
+          showIndicator("Unsupported image format");
+          return;
+        }
+        const ok = await BreakBackgroundManager.saveCustomBgFile(file);
+        if (!ok) {
+          showIndicator("Unable to save image");
+          return;
+        }
+        DOM.bgSourceSelect.value = "custom";
+        lastValidBgSource = "custom";
+        await syncCustomBgRow();
+        StorageManager.savePrefs();
+        if (!BreakBackgroundManager.hotSwapSource()) {
+          TimerController.render();
+        }
+        showIndicator("Custom image saved");
+      });
+    }
 
     function bindHoldButton(btn, fillEl, labelEl, idleText, holdingText, durationMs, onComplete) {
       if (!btn || !fillEl || !labelEl) return;
@@ -4181,9 +4500,12 @@
       AppState.dailyHistory = {};
       AppState.seenBgUrls = [];
 
+      await BreakBackgroundManager.clearCustomBg();
       BreakBackgroundManager.resetPools();
       BreakBackgroundManager.clear(false);
       StorageManager.applyPrefsToUI(DEFAULT_PREFS);
+      lastValidBgSource = DEFAULT_PREFS.bgSource;
+      await syncCustomBgRow();
       syncIntentVisibility();
 
       TimerController.resetInternalTracking();
@@ -4304,7 +4626,8 @@
       showIndicator,
       isTouchDevice,
       syncPresetPills,
-      syncIntentVisibility
+      syncIntentVisibility,
+      syncCustomBgRow
     };
   })();
 
@@ -4313,6 +4636,7 @@
    * ========================================================================= */
   StorageManager.loadAll();
   UIController.syncPresetPills();
+  UIController.syncCustomBgRow();
   window.addEventListener("storage", StorageManager.syncFromStorageEvent);
   document.addEventListener("fullscreenchange", () => {
     if (TypographyEngine.isReady()) TypographyEngine.fit(true);
