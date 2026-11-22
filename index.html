@@ -56,6 +56,443 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+
+/* === POPUP REFACTOR (APPLE HIG MONOCHROME) === */
+#popup {
+  width: 308px;
+  min-width: 290px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 28px);
+  overflow-y: auto;
+  scrollbar-width: none;
+  background: rgba(28, 28, 30, 0.84);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.68);
+  padding: 12px 14px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  box-sizing: border-box;
+}
+#popup::-webkit-scrollbar { display: none; }
+
+#popup .popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  margin-bottom: 8px;
+}
+#popup .popup-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0;
+}
+#popup .btn-info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.78);
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+#popup .btn-info-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+#popup .hig-group {
+  background: rgba(255, 255, 255, 0.065);
+  border-radius: 16px;
+  margin-bottom: 6px;
+  padding: 8px;
+}
+
+#popup .time-inputs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+#popup .time-field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 4px;
+}
+#popup .time-field + .time-field::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 0.5px;
+  background: rgba(255, 255, 255, 0.12);
+}
+#popup .time-field span {
+  font-size: 9.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.46);
+  line-height: 1.1;
+}
+#popup .time-field input {
+  width: 100%;
+  text-align: center;
+  font-size: 14.5px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  outline: none;
+  padding: 2px 0 0;
+  -moz-appearance: textfield;
+}
+#popup .time-field input::-webkit-outer-spin-button,
+#popup .time-field input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+#popup .preset-container {
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 12px;
+  padding: 3px;
+}
+#popup .preset-pills {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+#popup .preset-pill {
+  padding: 5px 4px;
+  border: none;
+  border-radius: 9.5px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.18s cubic-bezier(0.22, 1, 0.36, 1), color 0.18s ease;
+}
+#popup .preset-pill:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+#popup .preset-pill.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+#popup .global-vol-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 4px 7px;
+}
+#popup .global-vol-label {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.68);
+  white-space: nowrap;
+}
+#popup .global-vol-val {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.52);
+  min-width: 28px;
+  text-align: right;
+}
+#popup .global-vol-slider {
+  flex: 1 1 auto;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 99px;
+  outline: none;
+  cursor: pointer;
+}
+#popup .global-vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #ffffff;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+#popup .global-vol-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  background: #ffffff;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+
+#popup .sound-tiles-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+#popup .sound-tile {
+  position: relative;
+  height: 36px;
+  background: rgba(0, 0, 0, 0.24);
+  border-radius: 12px;
+  padding: 0 10px;
+  overflow: hidden;
+  cursor: ew-resize;
+  display: flex;
+  align-items: center;
+  touch-action: none;
+}
+#popup .sound-tile-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  transition: width 0.04s linear;
+}
+#popup .sound-tile.muted .sound-tile-fill {
+  width: 0% !important;
+}
+#popup .sound-tile-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  pointer-events: none;
+}
+#popup .sound-tile-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.94);
+  white-space: nowrap;
+}
+#popup .sound-tile.muted .sound-tile-title {
+  color: rgba(255, 255, 255, 0.46);
+}
+#popup .sound-tile-val {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.56);
+  white-space: nowrap;
+}
+#popup .sound-tile.muted .sound-tile-val {
+  color: rgba(255, 255, 255, 0.32);
+}
+
+#popup .hig-group-rows {
+  padding: 2px 8px;
+}
+#popup .hig-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 33px;
+  padding: 2px 4px;
+  gap: 10px;
+}
+#popup .hig-row + .hig-row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 4px;
+  right: 4px;
+  height: 0.5px;
+  background: rgba(255, 255, 255, 0.08);
+}
+#popup .hig-row label {
+  font-size: 12.5px;
+  font-weight: 450;
+  color: rgba(255, 255, 255, 0.92);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+#popup .switch {
+  position: relative;
+  width: 36px;
+  height: 21px;
+  background: rgba(255, 255, 255, 0.24);
+  border-radius: 10.5px;
+  cursor: pointer;
+  transition: background 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  flex-shrink: 0;
+}
+#popup .switch.active { background: #ffffff; }
+#popup .switch::after {
+  content: "";
+  position: absolute;
+  top: 2.5px;
+  left: 2.5px;
+  width: 16px;
+  height: 16px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.34);
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), background 0.2s ease;
+}
+#popup .switch.active::after {
+  transform: translateX(15px);
+  background: #1c1c1e;
+}
+
+#popup .hig-footer-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 6px 7px;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.48);
+  white-space: nowrap;
+}
+#popup .hig-footer-stats strong {
+  color: rgba(255, 255, 255, 0.88);
+  font-weight: 600;
+}
+
+#popup .popup-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 44px;
+  gap: 6px;
+}
+#popup .btn-hold-action {
+  position: relative;
+  overflow: hidden;
+  height: 34px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.085);
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+#popup .btn-hold-action:hover { background: rgba(255, 255, 255, 0.14); }
+#popup .btn-hold-action:active { transform: scale(0.96); }
+#popup .btn-hold-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0%;
+  background: rgba(255, 255, 255, 0.26);
+  pointer-events: none;
+}
+#popup .btn-hold-icon {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+#popup .btn-danger-hold {
+  background: rgba(255, 255, 255, 0.065);
+  color: rgba(255, 255, 255, 0.72);
+}
+#popup .btn-danger-hold:hover { color: #ffffff; }
+#popup .btn-danger-hold .btn-hold-fill { background: rgba(255, 255, 255, 0.28); }
+
+.hig-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 1200;
+}
+.hig-modal-backdrop.visible { opacity: 1; pointer-events: auto; }
+.hig-modal-card {
+  width: min(300px, calc(100vw - 24px));
+  background: rgba(28, 28, 30, 0.94);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 24px;
+  padding: 16px 18px;
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.72);
+  color: #ffffff;
+  transform: scale(0.93);
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  box-sizing: border-box;
+}
+.hig-modal-backdrop.visible .hig-modal-card { transform: scale(1); }
+.hig-confirm-title { margin: 0 0 6px; font-size: 14px; font-weight: 600; text-align: center; }
+.hig-confirm-desc { margin: 0 0 14px; font-size: 12px; line-height: 1.42; text-align: center; color: rgba(255, 255, 255, 0.64); }
+.hig-confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.hig-btn-modal {
+  height: 34px;
+  border: none;
+  border-radius: 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.hig-btn-cancel { background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.88); }
+.hig-btn-confirm { background: #ffffff; color: #1c1c1e; }
+.hig-info-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.hig-info-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #ffffff;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 11px;
+  cursor: pointer;
+}
+.hig-info-body {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.45;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.hig-info-body strong { color: #ffffff; }
+.hig-info-body hr { border: none; border-top: 0.5px solid rgba(255, 255, 255, 0.12); margin: 2px 0; width: 100%; }
+.hig-kbd-row { display: flex; justify-content: space-between; align-items: center; }
+.hig-kbd-row kbd {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px;
+  color: #ffffff;
+}
+
 </style>
 <style>
   :root {
@@ -1382,130 +1819,163 @@
   <div id="hot-zone"></div>
   <div id="top-pill" aria-hidden="true"></div>
 
-  <div id="popup">
-    <div id="popup-grabber" aria-hidden="true"></div>
-    <div class="popup-header">
-      <div class="popup-title">Settings</div>
-      <button type="button" id="btn-info" class="btn-info-icon" aria-label="Controls &amp; Credits" title="Controls &amp; Credits">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="16" x2="12" y2="12"></line>
-          <line x1="12" y1="8" x2="12.01" y2="8"></line>
-        </svg>
-      </button>
-    </div>
+  <div id="popup" role="dialog" aria-label="Settings">
+  <div class="popup-header">
+    <h2 class="popup-title">Settings</h2>
+    <button type="button" id="btn-info" class="btn-info-icon" title="Controls and Credits" aria-label="Controls and Credits">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+    </button>
+  </div>
 
-    <div class="hig-group">
-      <div class="hig-segment-wrap">
-        <div class="preset-pills" role="group" aria-label="Duration presets">
-          <button type="button" class="preset-pill active" data-focus="25" data-break="5" data-long="15">25 / 5</button>
-          <button type="button" class="preset-pill" data-focus="50" data-break="10" data-long="20">50 / 10</button>
-          <button type="button" class="preset-pill" data-focus="90" data-break="20" data-long="30">90 / 20</button>
-        </div>
+  <div class="hig-group">
+    <div class="time-inputs">
+      <div class="time-field">
+        <span>Focus</span>
+        <input type="number" id="f-dur" min="1" max="180" value="25">
       </div>
-      <div class="hig-duration-bar">
-        <div class="time-inputs">
-          <div class="time-field">
-            <span>Focus</span>
-            <input type="number" id="focus-dur" value="25" min="1" max="480" aria-label="Focus minutes">
-          </div>
-          <div class="time-field">
-            <span>Break</span>
-            <input type="number" id="break-dur" value="5" min="1" max="60" aria-label="Break minutes">
-          </div>
-          <div class="time-field">
-            <span>Long</span>
-            <input type="number" id="long-break-dur" value="15" min="1" max="120" aria-label="Long break minutes">
-          </div>
-        </div>
-        <button type="button" class="hig-apply-btn" id="apply-config">Apply</button>
+      <div class="time-field">
+        <span>Break</span>
+        <input type="number" id="b-dur" min="1" max="60" value="5">
+      </div>
+      <div class="time-field">
+        <span>Long</span>
+        <input type="number" id="l-dur" min="1" max="90" value="15">
       </div>
     </div>
 
-    <div class="hig-group">
-      <div class="hig-row">
-        <label for="autostart-toggle">Auto-start</label>
-        <div id="autostart-toggle" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
+    <div class="preset-container">
+      <div class="preset-pills">
+        <button type="button" class="preset-pill active" data-f="25" data-b="5" data-l="15">25 / 5</button>
+        <button type="button" class="preset-pill" data-f="50" data-b="10" data-l="20">50 / 10</button>
+        <button type="button" class="preset-pill" data-f="90" data-b="20" data-l="30">90 / 20</button>
       </div>
-      <div class="hig-row">
-        <label for="overtime-toggle">Overtime</label>
-        <div id="overtime-toggle" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
-      </div>
-      <div class="hig-row">
-        <label for="notif-toggle">Notifications</label>
-        <div id="notif-toggle" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
-      </div>
-      <div class="hig-row">
-        <label for="progress-toggle">Progress bar</label>
-        <div id="progress-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
-      </div>
-      <div class="hig-row">
-        <input type="text" id="session-intent-input" class="intent-input" maxlength="80" placeholder="Session intention…" aria-label="Session intention">
-      </div>
-    </div>
-
-    <div class="hig-group">
-      <div class="hig-row">
-        <label for="noise-toggle">Brown noise</label>
-        <div id="noise-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
-      </div>
-      <div class="hig-row">
-        <label for="tick-toggle">Watch tick</label>
-        <div id="tick-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
-      </div>
-      <div class="hig-row">
-        <label for="vol-slider">Volume</label>
-        <input type="range" id="vol-slider" min="0" max="100" value="100">
-      </div>
-      <div class="hig-row">
-        <label for="bg-toggle">Nature break</label>
-        <div id="bg-toggle" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
-      </div>
-      <div class="hig-row">
-        <label for="bg-source">Source</label>
-        <div class="hig-select-wrap">
-          <select id="bg-source" class="select-field">
-            <option value="auto" selected>Automatic</option>
-            <option value="local">Local (Offline)</option>
-            <option value="mix">All (Landscapes)</option>
-            <option value="wikimedia">Wikimedia</option>
-            <option value="bing-nature">Bing Archive</option>
-            <option value="custom">Custom image…</option>
-          </select>
-          <span class="hig-select-chevron" aria-hidden="true">
-            <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 1l4 4 4-4"/>
-            </svg>
-          </span>
-        </div>
-      </div>
-      <div class="hig-row" id="bg-custom-row" hidden>
-        <span id="bg-custom-name" class="hig-custom-name">No image selected</span>
-        <button type="button" id="bg-custom-btn" class="hig-inline-btn">Choose…</button>
-        <input type="file" id="bg-custom-input" accept="image/*" hidden>
-      </div>
-    </div>
-
-    <div class="hig-footer-stats">
-      <span>Today · <strong id="pomodoro-count">0</strong></span>
-      <span>7 days · <strong id="weekly-focus-total">0m</strong></span>
-    </div>
-
-    <div class="popup-actions">
-      <button type="button" class="btn-hold-action" id="btn-skip">
-        <span class="btn-hold-fill" id="btn-skip-fill"></span>
-        <span class="btn-hold-label" id="btn-skip-label">Skip</span>
-      </button>
-      <button type="button" class="btn-hold-action" id="btn-reset">
-        <span class="btn-hold-fill" id="btn-reset-fill"></span>
-        <span class="btn-hold-label" id="btn-reset-label">Reset</span>
-      </button>
-      <button type="button" class="btn-hold-action btn-danger-hold" id="btn-factory-reset">
-        <span class="btn-hold-fill" id="btn-factory-reset-fill"></span>
-        <span class="btn-hold-label" id="btn-factory-reset-label">Reset all</span>
-      </button>
     </div>
   </div>
+
+  <div class="hig-group">
+    <div class="global-vol-row">
+      <label for="master-vol" class="global-vol-label">Volume</label>
+      <input type="range" id="master-vol" class="global-vol-slider" min="0" max="100" value="80">
+      <span id="master-vol-val" class="global-vol-val">80%</span>
+    </div>
+
+    <div class="sound-tiles-grid">
+      <div class="sound-tile" data-sound="noise" data-vol="65" role="slider" aria-label="Brown noise volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="65" tabindex="0">
+        <div class="sound-tile-fill" style="width: 65%;"></div>
+        <div class="sound-tile-content">
+          <span class="sound-tile-title">Brown noise</span>
+          <span class="sound-tile-val">65%</span>
+        </div>
+      </div>
+
+      <div class="sound-tile" data-sound="tick" data-vol="40" role="slider" aria-label="Watch tick volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="40" tabindex="0">
+        <div class="sound-tile-fill" style="width: 40%;"></div>
+        <div class="sound-tile-content">
+          <span class="sound-tile-title">Watch tick</span>
+          <span class="sound-tile-val">40%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hig-group hig-group-rows">
+    <div class="hig-row">
+      <label for="sw-autostart">Auto-start</label>
+      <div id="sw-autostart" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
+    </div>
+    <div class="hig-row">
+      <label for="sw-overflow">Overflow</label>
+      <div id="sw-overflow" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
+    </div>
+    <div class="hig-row">
+      <label for="sw-progress">Progress bar</label>
+      <div id="sw-progress" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
+    </div>
+    <div class="hig-row">
+      <label for="sw-notif">Notifications</label>
+      <div id="sw-notif" class="switch" role="switch" aria-checked="false" tabindex="0"></div>
+    </div>
+    <div class="hig-row">
+      <label for="sw-nature">Nature break</label>
+      <div id="sw-nature" class="switch active" role="switch" aria-checked="true" tabindex="0"></div>
+    </div>
+  </div>
+
+  <div class="hig-footer-stats">
+    <span>Today · <strong id="stat-today">0</strong></span>
+    <span>7 days · <strong id="stat-week">0m</strong></span>
+  </div>
+
+  <div class="popup-actions">
+    <button type="button" id="btn-reset" class="btn-hold-action" data-action="reset" data-hold="1500" title="Hold to Reset" aria-label="Hold to Reset">
+      <span class="btn-hold-fill"></span>
+      <span class="btn-hold-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+          <path d="M3 3v5h5"></path>
+        </svg>
+      </span>
+    </button>
+
+    <button type="button" id="btn-skip" class="btn-hold-action" data-action="skip" data-hold="1500" title="Hold to Skip" aria-label="Hold to Skip">
+      <span class="btn-hold-fill"></span>
+      <span class="btn-hold-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="5 4 15 12 5 20 5 4"></polygon>
+          <line x1="19" y1="5" x2="19" y2="19"></line>
+        </svg>
+      </span>
+    </button>
+
+    <button type="button" id="btn-reset-all" class="btn-hold-action btn-danger-hold" data-action="reset-all" data-hold="2000" title="Hold to Reset All" aria-label="Hold to Reset All">
+      <span class="btn-hold-fill"></span>
+      <span class="btn-hold-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          <line x1="10" y1="11" x2="10" y2="17"></line>
+          <line x1="14" y1="11" x2="14" y2="17"></line>
+        </svg>
+      </span>
+    </button>
+  </div>
+</div>
+
+<div id="hig-confirm-backdrop" class="hig-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="hig-confirm-title">
+  <div class="hig-modal-card">
+    <h3 id="hig-confirm-title" class="hig-confirm-title">Reset all data?</h3>
+    <p class="hig-confirm-desc">This will clear your completed sessions, statistics, and restore default durations and settings.</p>
+    <div class="hig-confirm-actions">
+      <button type="button" id="hig-confirm-cancel" class="hig-btn-modal hig-btn-cancel">Cancel</button>
+      <button type="button" id="hig-confirm-yes" class="hig-btn-modal hig-btn-confirm">Reset all</button>
+    </div>
+  </div>
+</div>
+
+<div id="hig-info-backdrop" class="hig-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="hig-info-title">
+  <div class="hig-modal-card">
+    <div class="hig-info-header">
+      <span id="hig-info-title" style="font-weight:600;font-size:13.5px;">Pomodoro Ultimate</span>
+      <button type="button" id="hig-info-close" class="hig-info-close" aria-label="Close">✕</button>
+    </div>
+    <div class="hig-info-body">
+      <div class="hig-kbd-row"><span>Play / Pause</span><kbd>Space</kbd></div>
+      <div class="hig-kbd-row"><span>Settings</span><kbd>S</kbd></div>
+      <div class="hig-kbd-row"><span>Fullscreen</span><kbd>F</kbd></div>
+      <hr>
+      <div><strong>Typography and Google Fonts Credits</strong></div>
+      <div>• <em>Google Sans Flex</em>, Google LLC (SIL Open Font License 1.1)</div>
+      <div>• <em>Inter</em>, Rasmus Andersson (SIL Open Font License 1.1)</div>
+      <hr>
+      <div><strong>License and Author</strong></div>
+      <div>Created by <strong>Hugo Maurin</strong> · PolyForm Noncommercial License 1.0.0. Procedural Web Audio API synthesis.</div>
+    </div>
+  </div>
+</div>
 
   <div id="factory-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="factory-modal-title">
     <div id="factory-modal">
@@ -4806,5 +5276,114 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+<script>
+(() => {
+  const popup = document.getElementById('popup');
+  if (!popup) return;
+
+  const confirmBackdrop = document.getElementById('hig-confirm-backdrop');
+  const infoBackdrop = document.getElementById('hig-info-backdrop');
+
+  document.getElementById('btn-info')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    infoBackdrop?.classList.add('visible');
+  });
+  document.getElementById('hig-info-close')?.addEventListener('click', () => infoBackdrop?.classList.remove('visible'));
+  infoBackdrop?.addEventListener('click', (e) => { if (e.target === infoBackdrop) infoBackdrop.classList.remove('visible'); });
+
+  document.getElementById('hig-confirm-cancel')?.addEventListener('click', () => confirmBackdrop?.classList.remove('visible'));
+  confirmBackdrop?.addEventListener('click', (e) => { if (e.target === confirmBackdrop) confirmBackdrop.classList.remove('visible'); });
+  document.getElementById('hig-confirm-yes')?.addEventListener('click', () => {
+    confirmBackdrop?.classList.remove('visible');
+    if (typeof window.resetAllData === 'function') {
+      window.resetAllData();
+    } else {
+      localStorage.clear();
+      location.reload();
+    }
+  });
+
+  // Tiles de son interactives (0% = desactive)
+  function applyTileVolume(tile, pct) {
+    const clamped = Math.max(0, Math.min(100, Math.round(pct)));
+    const finalPct = clamped <= 4 ? 0 : clamped;
+    tile.dataset.vol = finalPct;
+    tile.setAttribute('aria-valuenow', finalPct);
+    const fill = tile.querySelector('.sound-tile-fill');
+    const valEl = tile.querySelector('.sound-tile-val');
+    if (fill) fill.style.width = finalPct + '%';
+    if (valEl) valEl.textContent = finalPct === 0 ? 'Off' : finalPct + '%';
+    tile.classList.toggle('muted', finalPct === 0);
+    tile.dispatchEvent(new CustomEvent('tilevolumechange', { detail: { sound: tile.dataset.sound, volume: finalPct / 100 } }));
+  }
+
+  popup.querySelectorAll('.sound-tile').forEach((tile) => {
+    let dragging = false;
+    const updateFromX = (x) => {
+      const rect = tile.getBoundingClientRect();
+      applyTileVolume(tile, ((x - rect.left) / rect.width) * 100);
+    };
+    tile.addEventListener('pointerdown', (e) => {
+      dragging = true;
+      tile.setPointerCapture(e.pointerId);
+      updateFromX(e.clientX);
+    });
+    tile.addEventListener('pointermove', (e) => { if (dragging) updateFromX(e.clientX); });
+    const endDrag = (e) => {
+      if (!dragging) return;
+      dragging = false;
+      if (tile.hasPointerCapture(e.pointerId)) tile.releasePointerCapture(e.pointerId);
+    };
+    tile.addEventListener('pointerup', endDrag);
+    tile.addEventListener('pointercancel', endDrag);
+  });
+
+  const masterVol = document.getElementById('master-vol');
+  const masterVolVal = document.getElementById('master-vol-val');
+  masterVol?.addEventListener('input', () => {
+    if (masterVolVal) masterVolVal.textContent = masterVol.value + '%';
+  });
+
+  // Hold-to-trigger sur Reset / Skip / Reset all
+  popup.querySelectorAll('.btn-hold-action').forEach((btn) => {
+    const fill = btn.querySelector('.btn-hold-fill');
+    const duration = parseInt(btn.dataset.hold || '1500', 10);
+    const action = btn.dataset.action;
+    let raf = null, start = 0, fired = false;
+
+    const resetFill = () => {
+      cancelAnimationFrame(raf);
+      if (fill) fill.style.width = '0%';
+    };
+
+    btn.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
+      fired = false;
+      start = performance.now();
+      const tick = (now) => {
+        const pct = Math.min(100, ((now - start) / duration) * 100);
+        if (fill) fill.style.width = pct + '%';
+        if (pct < 100) {
+          raf = requestAnimationFrame(tick);
+        } else if (!fired) {
+          fired = true;
+          resetFill();
+          if (action === 'reset-all') {
+            confirmBackdrop?.classList.add('visible');
+          } else if (action === 'skip' && typeof window.skipPhase === 'function') {
+            window.skipPhase();
+          } else if (action === 'reset' && typeof window.resetTimer === 'function') {
+            window.resetTimer();
+          }
+        }
+      };
+      raf = requestAnimationFrame(tick);
+    });
+    ['pointerup', 'pointercancel', 'mouseleave'].forEach((ev) => btn.addEventListener(ev, resetFill));
+  });
+})();
+</script>
+
 </body>
 </html>
